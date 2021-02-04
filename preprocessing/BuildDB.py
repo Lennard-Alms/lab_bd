@@ -74,7 +74,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             patches = np.dot(patches, hyperplane_normals) < 0
 
             # save in file with option "a" => read write if exists esle create
-            with h5py.File("hashes.hdf5", "a") as f:
+            with h5py.File("hashes.hdf5", "w") as f:
 
                 # open h file dataset or create a new one if this is the first iteration
                 if str(patch_size) in f:
