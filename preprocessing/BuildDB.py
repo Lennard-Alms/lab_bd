@@ -8,7 +8,7 @@ import time
 import h5py
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
-def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=5):
+def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
 
     hyperplane_normals_list = list()
     patches_per_image_list = list()
@@ -51,52 +51,52 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         # record time for animation eta
         start_time = time.time()
 
-        # save in file with option "a" => read write if exists esle create
-        with h5py.File("hashes.hdf5", "w") as f:
-            # create hfile dataset
-            hfile = f.create_dataset(str(patch_size), (len(paths) * patches_per_image, signature_size) , dtype='?')
+        # do the whole hashing for each batch
+        for batch_idx in range(max_batches):
 
-            # do the whole hashing for each batch
-            for batch_idx in range(max_batches):
+            # animation for observing during runtime
+            print("Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
 
-                # animation for observing during runtime
-                print("Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
+            # calculate the range of images
+            path_idx_start = batch_size * batch_idx
+            path_idx_end = path_idx_start + batch_size
 
-                # calculate the range of images
-                path_idx_start = batch_size * batch_idx
-                path_idx_end = path_idx_start + batch_size
+            # load the images and create the patches
+            patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
-                # load the images and create the patches
-                patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
+            # use vgg to calculate the feature vectors
+            patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
 
-                # use vgg to calculate the feature vectors
-                patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
+            # flatten the feature vectors
+            patches = patches.reshape((patches.shape[0],pred_dim))
 
-                # flatten the feature vectors
-                patches = patches.reshape((patches.shape[0],pred_dim))
+            # calculate the hash signatures
+            patches = np.dot(patches, hyperplane_normals) < 0
 
-                # calculate the hash signatures
-                patches = np.dot(patches, hyperplane_normals) < 0
+            # save in file with option "a" => read write if exists esle create
+            with h5py.File("hashes.hdf5", "a") as f:
+
+                # open h file dataset or create a new one if this is the first iteration
+                if str(patch_size) in f:
+                    hfile = f[str(patch_size)]
+                else:
+                    # save as boolean file with '?' parameter
+                    hfile = f.create_dataset(str(patch_size), (len(paths) * patches_per_image, signature_size) , dtype='?')
 
                 # save the calculated hashes in the h file dataset
                 start_hash_idx = batch_idx * batch_size * patches_per_image
                 end_hash_idx = start_hash_idx + batch_size * patches_per_image
                 hfile[start_hash_idx:end_hash_idx] = patches
 
-                # calculate eta for the animation
-                eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
-                start_time = time.time()
+            # calculate eta for the animation
+            eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
+            start_time = time.time()
 
         # free variables
         patches = None
     return patches_per_image_list, hyperplane_normals_list
 
 
-    # # open h file dataset or create a new one if this is the first iteration
-    # if str(patch_size) in f:
-    #     hfile = f[str(patch_size)]
-    # else:
-    #     # save as boolean file with '?' parameter
 
 
 
