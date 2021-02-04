@@ -2,3 +2,5 @@
 input/
 .ipynb_checkpoints/
 notebooks/
+test.ipynb
+hashes.hdf5

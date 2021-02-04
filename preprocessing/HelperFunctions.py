@@ -1,4 +1,5 @@
 import math
+import numpy as np
 
 def get_patches_from_image(image, window_size, window_overlap):
     number_of_tiles_x = int(math.ceil(image.shape[1] / (window_size[1] * (1 - window_overlap))))

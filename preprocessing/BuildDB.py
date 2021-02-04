@@ -8,7 +8,7 @@ import time
 import h5py
 
 # OUTPUT: h-file with hash singatures
-def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, singature_size=4096, batch_size=10):
+def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
 
     hyperplane_normals_list = list()
     patches_per_image_list = list()
@@ -17,7 +17,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, singature_siz
     for patch_size in patch_sizes:
 
         # vgg needs a specific input shape thats why we declare it inside the patch loop
-        vgg = tf.keras.applications.VGG19(include_top=False,
+        vgg = tf.keras.applications.VGG16(include_top=False,
                                       weights='imagenet',
                                       input_shape=(patch_size[0], patch_size[1], 3))
 
@@ -25,21 +25,22 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, singature_siz
         max_batches = math.ceil(len(paths) / batch_size)
 
         # make a test run to find output shape for each image this implies that all images have the same dimensions
-        test_run = get_patches_from_image(cv2.imread(path), p_size, overlap))
+        test_run = get_patches_from_image(cv2.imread(paths[0]), patch_size, overlap)
+        test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_run[:2]), verbose=1)
 
         # save the patches per image so we can do a back calculation later and see what patch came from what image
         patches_per_image = test_run.shape[0]
         patches_per_image_list.append(patches_per_image)
 
         # calculate the hyperplane normals for hashing
-        pred_dim = test_run.shape[1] * test_run.shape[2] * test_run.shape[3]
+        pred_dim = test_pred.shape[1] * test_pred.shape[2] * test_pred.shape[3]
         hyperplane_normals = np.random.normal(0,1,(pred_dim,signature_size))
 
         # save hyperplane normals for prediction later
         hyperplane_normals_list.append(hyperplane_normals)
 
         # free the variable since we have no further use for it
-        test_run = None
+        test_run, test_pred = None, None
 
         # record time for animation eta
         start_time = time.time()
@@ -52,24 +53,23 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, singature_siz
         for batch_idx in range(max_batches):
 
             # animation for observing during runtime
-            sys.stdout.write("\r Size " + str(patch_size) + " Batch " + str(batch_idx) + "/" + str(max_batches) + "ETA: " + str(eta) + " min")
-            sys.stdout.flush()
+            print("\r Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
 
             # calculate the range of images
             path_idx_start = batch_size * batch_idx
             path_idx_end = path_idx_start + batch_size
 
             # load the images and create the patches
-            patch_array = np.concatenate([get_patches_from_image(cv2.imread(path), p_size, overlap) for path in paths[path_idx_start:path_idx_end]])
+            patch_array = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
             # use vgg to calculate the feature vectors
-            base_pred = vgg.predict(tf.keras.applications.vgg19.preprocess_input(patch_array), verbose=1)
+            base_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patch_array), verbose=0)
 
             # flatten the feature vectors
             base_pred = base_pred.reshape((base_pred.shape[0],pred_dim))
 
             # calculate the hash signatures
-            base_hash_signatures = np.dot(base_pred, projection_normals) < 0
+            base_hash_signatures = np.dot(base_pred, hyperplane_normals) < 0
 
             # save in file with option "a" => read write if exists esle create
             with h5py.File("hashes.hdf5", "a") as f:
@@ -92,7 +92,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, singature_siz
 
         # free variables
         patch_array, base_pred, test_run = None, None, None
-
+    return patches_per_image_list
 
 
 
