@@ -62,16 +62,16 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             path_idx_end = path_idx_start + batch_size
 
             # load the images and create the patches
-            patch_array = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
+            patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
             # use vgg to calculate the feature vectors
-            base_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patch_array), verbose=1)
+            patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
 
             # flatten the feature vectors
-            base_pred = base_pred.reshape((base_pred.shape[0],pred_dim))
+            patches = patches.reshape((patches.shape[0],pred_dim))
 
             # calculate the hash signatures
-            hash_signatures = np.dot(base_pred, hyperplane_normals) < 0
+            patches = np.dot(patches, hyperplane_normals) < 0
 
             # save in file with option "a" => read write if exists esle create
             with h5py.File("hashes.hdf5", "a") as f:
@@ -86,14 +86,14 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                 # save the calculated hashes in the h file dataset
                 start_hash_idx = batch_idx * batch_size * patches_per_image
                 end_hash_idx = start_hash_idx + batch_size * patches_per_image
-                hfile[start_hash_idx:end_hash_idx] = hash_signatures
+                hfile[start_hash_idx:end_hash_idx] = patches
 
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
 
         # free variables
-        patch_array, base_pred, test_run = None, None, None
+        patches = None
     return patches_per_image_list, hyperplane_normals_list
 
 
