@@ -7,7 +7,7 @@ import cv2
 import time
 import h5py
 
-# OUTPUT: h-file with hash singatures
+# OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
 
     hyperplane_normals_list = list()
@@ -94,7 +94,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
 
         # free variables
         patch_array, base_pred, test_run = None, None, None
-    return patches_per_image_list
+    return patches_per_image_list, hyperplane_normals_list
 
 
 
