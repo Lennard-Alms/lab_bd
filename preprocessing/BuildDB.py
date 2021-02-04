@@ -24,13 +24,19 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         # caluclate the maximum ammount of loops untill we have all images
         max_batches = math.ceil(len(paths) / batch_size)
 
+        # record time for animation eta
+        start_time = time.time()
+
         # make a test run to find output shape for each image this implies that all images have the same dimensions
         test_run = get_patches_from_image(cv2.imread(paths[0]), patch_size, overlap)
-        test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_run[:2]), verbose=1)
+        test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_run[:2]), verbose=0)
 
         # save the patches per image so we can do a back calculation later and see what patch came from what image
         patches_per_image = test_run.shape[0]
         patches_per_image_list.append(patches_per_image)
+
+        # initialize ETA
+        eta = round((time.time() - start_time) * len(paths) * patches_per_image / 60, 2)
 
         # calculate the hyperplane normals for hashing
         pred_dim = test_pred.shape[1] * test_pred.shape[2] * test_pred.shape[3]
@@ -45,15 +51,11 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         # record time for animation eta
         start_time = time.time()
 
-        # initialize ETA
-        eta = 999
-
-
         # do the whole hashing for each batch
         for batch_idx in range(max_batches):
 
             # animation for observing during runtime
-            print("\r Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
+            print("Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
 
             # calculate the range of images
             path_idx_start = batch_size * batch_idx
@@ -63,13 +65,13 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             patch_array = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
             # use vgg to calculate the feature vectors
-            base_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patch_array), verbose=0)
+            base_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patch_array), verbose=1)
 
             # flatten the feature vectors
             base_pred = base_pred.reshape((base_pred.shape[0],pred_dim))
 
             # calculate the hash signatures
-            base_hash_signatures = np.dot(base_pred, hyperplane_normals) < 0
+            hash_signatures = np.dot(base_pred, hyperplane_normals) < 0
 
             # save in file with option "a" => read write if exists esle create
             with h5py.File("hashes.hdf5", "a") as f:
@@ -79,12 +81,12 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                     hfile = f[str(patch_size)]
                 else:
                     # save as boolean file with '?' parameter
-                    hfile = f.create_dataset(str(patch_size), (len(paths), patches_per_image) , dtype='?')
+                    hfile = f.create_dataset(str(patch_size), (len(paths) * patches_per_image, signature_size) , dtype='?')
 
                 # save the calculated hashes in the h file dataset
                 start_hash_idx = batch_idx * batch_size * patches_per_image
                 end_hash_idx = start_hash_idx + batch_size * patches_per_image
-                hfile[start_hash_idx:end_hash_idx]
+                hfile[start_hash_idx:end_hash_idx] = hash_signatures
 
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
