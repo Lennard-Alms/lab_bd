@@ -81,19 +81,19 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                     hfile = f[str(patch_size)]
                 else:
                     # save as boolean file with '?' parameter
-                    hfile = f.create_dataset(str(patch_size), (len(paths) * patches_per_image, signature_size) , dtype='?')
+                    hfile = f.create_dataset(str(patch_size), (0, signature_size) , dtype='?', maxshape=(None, signature_size))
 
                 # save the calculated hashes in the h file dataset
-                start_hash_idx = batch_idx * batch_size * patches_per_image
-                end_hash_idx = start_hash_idx + batch_size * patches_per_image
-                hfile[start_hash_idx:end_hash_idx] = patches
+                hfile_index = hfile.shape[0]
+                hfile.resize(hfile.shape[0] + patches.shape[0], axis = 0)
+                hfile[hfile_index:] = patches
 
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
 
         # free variables
-        patches = None
+        patches, vgg = None, None
     return patches_per_image_list, hyperplane_normals_list
 
 
