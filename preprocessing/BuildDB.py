@@ -8,7 +8,7 @@ import time
 import h5py
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
-def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
+def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=5):
 
     hyperplane_normals_list = list()
     patches_per_image_list = list()
@@ -36,7 +36,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         patches_per_image_list.append(patches_per_image)
 
         # initialize ETA
-        eta = round((time.time() - start_time) * len(paths) * patches_per_image / 60, 2)
+        eta = round((time.time() - start_time) * len(paths) * 2 / 60, 2)
 
         # calculate the hyperplane normals for hashing
         pred_dim = test_pred.shape[1] * test_pred.shape[2] * test_pred.shape[3]
