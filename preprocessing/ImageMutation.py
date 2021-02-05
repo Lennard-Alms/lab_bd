@@ -50,7 +50,7 @@ class PatchMutation:
         if np.random.rand() < self.mutation_probability:
             evaluation_image = None
             r = np.random.randint(0, len(self.patches))
-            mutation_label = r
+            mutation_label = r + 1
             evaluation_image = self.patches[r]
             image = add_patch_to_image(image, evaluation_image)
         return image, mutation_label
