@@ -55,7 +55,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                 hfile = f[set_name]
             else:
                 hfile = f.create_dataset(set_name, test_loc.shape , dtype='i')
-            hfile[:] = test_loc
+            hfile[:] = test_loc.astype(np.dtype('i'))
 
         # free the variable since we have no further use for it
         del(test_run)
