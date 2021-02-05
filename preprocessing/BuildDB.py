@@ -107,7 +107,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
 
     # save ppi and hash normals
     print(hyperplane_normals_list)
-    print(hyperplane_normals_list.shape)
+    print(np.concatenate(hyperplane_normals_list))
     patches_per_image_list = np.array(patches_per_image_list)
     hyperplane_normals_list = np.array(hyperplane_normals_list)
     print(hyperplane_normals_list)
