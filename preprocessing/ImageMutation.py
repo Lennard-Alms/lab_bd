@@ -47,7 +47,7 @@ class PatchMutation:
 
     def mutate(self, image):
         is_mutated = False
-        if np.random.rand() < prob:
+        if np.random.rand() < self.mutation_probability:
             is_mutated = True
             evaluation_image = None
             r = np.random.randint(0, len(self.patches))
