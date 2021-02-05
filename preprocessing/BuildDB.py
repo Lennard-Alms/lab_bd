@@ -79,7 +79,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             patches = np.dot(patches, hyperplane_normals) < 0
 
             # save in file with option "a" => read write if exists esle create
-            with h5py.File("hashes.hdf5", "w") as f:
+            with h5py.File("hashes.hdf5", "a") as f:
 
                 # open h file dataset or create a new one if this is the first iteration
                 if str(patch_size) in f:
@@ -108,7 +108,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
     # save ppi and hash normals
     patches_per_image_list = np.array(patches_per_image_list)
     hyperplane_normals_list = np.array(hyperplane_normals_list)
-    with h5py.File("hashes.hdf5", "w") as f:
+    with h5py.File("hashes.hdf5", "a") as f:
         hfile = f.create_dataset('ppi', patches_per_image_list.shape , dtype='i')
         hfile[:] = patches_per_image_list
         hfile = f.create_dataset('hn', hyperplane_normals_list.shape , dtype='f')
