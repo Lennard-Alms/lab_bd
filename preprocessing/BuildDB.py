@@ -96,11 +96,14 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
 
+            # free variables
+            del(patches)
+            gc.collect()
+
         # free variables
         del(vgg)
-        del(patches)
-        del(hyperplane_normals_list)
         gc.collect()
+
     return patches_per_image_list, hyperplane_normals_list
 
 
