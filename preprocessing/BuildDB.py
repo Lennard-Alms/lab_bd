@@ -95,7 +95,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             del(patches)
             gc.collect()
 
-            print('exit6')
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
