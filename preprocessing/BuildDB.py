@@ -36,7 +36,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         patches_per_image_list.append(patches_per_image)
 
         # initialize ETA
-        eta = round((time.time() - start_time) * len(paths) * patches_per_image / 60, 2)
+        eta = round((time.time() - start_time) * len(paths) * 2 / 60, 2)
 
         # calculate the hyperplane normals for hashing
         pred_dim = test_pred.shape[1] * test_pred.shape[2] * test_pred.shape[3]
@@ -62,38 +62,38 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             path_idx_end = path_idx_start + batch_size
 
             # load the images and create the patches
-            patch_array = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
+            patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
             # use vgg to calculate the feature vectors
-            base_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patch_array), verbose=1)
+            patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
 
             # flatten the feature vectors
-            base_pred = base_pred.reshape((base_pred.shape[0],pred_dim))
+            patches = patches.reshape((patches.shape[0],pred_dim))
 
             # calculate the hash signatures
-            hash_signatures = np.dot(base_pred, hyperplane_normals) < 0
+            patches = np.dot(patches, hyperplane_normals) < 0
 
             # save in file with option "a" => read write if exists esle create
-            with h5py.File("hashes.hdf5", "a") as f:
+            with h5py.File("hashes.hdf5", "w") as f:
 
                 # open h file dataset or create a new one if this is the first iteration
                 if str(patch_size) in f:
                     hfile = f[str(patch_size)]
                 else:
                     # save as boolean file with '?' parameter
-                    hfile = f.create_dataset(str(patch_size), (len(paths) * patches_per_image, signature_size) , dtype='?')
+                    hfile = f.create_dataset(str(patch_size), (0, signature_size) , dtype='?', maxshape=(None, signature_size))
 
                 # save the calculated hashes in the h file dataset
-                start_hash_idx = batch_idx * batch_size * patches_per_image
-                end_hash_idx = start_hash_idx + batch_size * patches_per_image
-                hfile[start_hash_idx:end_hash_idx] = hash_signatures
+                hfile_index = hfile.shape[0]
+                hfile.resize(hfile.shape[0] + patches.shape[0], axis = 0)
+                hfile[hfile_index:] = patches
 
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
 
         # free variables
-        patch_array, base_pred, test_run = None, None, None
+        patches, vgg = None, None
     return patches_per_image_list, hyperplane_normals_list
 
 
