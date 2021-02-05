@@ -1,4 +1,5 @@
 from .HelperFunctions import get_patches_from_image
+from .HelperFunctions import get_patch_locations
 import tensorflow as tf
 import math
 import numpy as np
@@ -31,6 +32,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         test_run = get_patches_from_image(cv2.imread(paths[0]), patch_size, overlap)
         test_pred = tf.convert_to_tensor(test_run[:2], dtype=test_run.dtype)
         test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_pred), verbose=0)
+        test_loc = get_patch_locations(cv2.imread(paths[0]), patch_size, overlap)
 
         # save the patches per image so we can do a back calculation later and see what patch came from what image
         patches_per_image = test_run.shape[0]
@@ -43,8 +45,28 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         pred_dim = test_pred.shape[1] * test_pred.shape[2] * test_pred.shape[3]
         hyperplane_normals = np.random.normal(0,1,(pred_dim,signature_size))
 
+
+        with h5py.File("hashes.hdf5", "a") as f:
+            # save hyperplanes for prediction
+            set_name = 'hn' + str(patch_size)
+            if set_name in f:
+                hfile = f[set_name]
+            else:
+                hfile = f.create_dataset(set_name, hyperplane_normals.shape , dtype='f')
+            hfile[:] = hyperplane_normals
+
+            # save location of patches
+            set_name = 'loc' + str(patch_size)
+            if set_name in f:
+                hfile = f[set_name]
+            else:
+                hfile = f.create_dataset(set_name, test_loc.shape , dtype='f')
+            hfile[:] = test_loc
+
+
         # free the variable since we have no further use for it
         del(test_run)
+        del(test_loc)
         del(test_pred)
         gc.collect()
 
@@ -98,14 +120,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             gc.collect()
 
 
-        # save hyperplanes for prediction
-        with h5py.File("hashes.hdf5", "a") as f:
-            set_name = 'hn' + str(patch_size)
-            if set_name in f:
-                hfile = f[set_name]
-            else:
-                hfile = f.create_dataset(set_name, hyperplane_normals.shape , dtype='f')
-            hfile[:] = hyperplane_normals
 
         # free variables
         del(vgg)
