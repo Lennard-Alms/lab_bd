@@ -1,6 +1,5 @@
 from .HelperFunctions import get_patches_from_image
 from .HelperFunctions import get_patch_locations
-from .ImageMutation import PatchMutation
 import tensorflow as tf
 import math
 import numpy as np
@@ -81,9 +80,24 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
             if mutationStrategy:
-                mutationStrategy = PatchMutation()
-                for patch in patches:
-                    patch, lable = mutationStrategy.mutate(patch)
+                labels = np.zeros(patches.shape[0])
+                for p_idx in range(patches.shape[0]):
+                    patches[p_idx], labels[p_idx] = mutationStrategy.mutate(patch)
+
+                with h5py.File("hashes.hdf5", "a") as f:
+                    # open h file dataset or create a new one if this is the first iteration
+                    set_name = 'lab' + str(patch_size)
+                    if set_name in f:
+                        hfile = f[set_name]
+                    else:
+                        # save as boolean file with '?' parameter
+                        hfile = f.create_dataset(set_name, (0,) , dtype='i', maxshape=(None,))
+
+                    # save the calculated hashes in the h file dataset
+                    hfile_index = hfile.shape[0]
+                    hfile.resize(hfile.shape[0] + labels.shape[0], axis = 0)
+                    hfile[hfile_index:] = labels
+
 
 
 
