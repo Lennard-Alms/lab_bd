@@ -124,7 +124,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
 
     # free variables
     del(patches_per_image_list)
-    del(hyperplane_normals_list)
     gc.collect()
 
 
