@@ -1,4 +1,5 @@
 import h5py
+import numpy as np
 
 def createCoffeemakerEvaluation(image_paths, hashingStrategy):
     x = 1
@@ -11,4 +12,4 @@ def find_image_and_patch(patch_id, patch_size):
     image_id = patch_id // ppi
     location = patch_id - image_id * ppi
 
-    return image_id, loc[location]
+    return image_id, loc[location].astype(np.dtype('i'))
