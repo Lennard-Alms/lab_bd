@@ -1,5 +1,6 @@
 from .HelperFunctions import get_patches_from_image
 from .HelperFunctions import get_patch_locations
+from .ImageMutation import PatchMutation
 import tensorflow as tf
 import math
 import numpy as np
@@ -79,6 +80,13 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             # load the images and create the patches
             patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
+            if mutationStrategy:
+                mutationStrategy = PatchMutation()
+                for patch in patches:
+                    patch, lable = mutationStrategy.mutate(patch)
+
+
+
             # use vgg to calculate the feature vectors
             patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
             patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
@@ -111,8 +119,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             # free variables
             del(patches)
             gc.collect()
-
-
 
         # free variables
         del(vgg)
