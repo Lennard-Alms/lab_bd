@@ -67,9 +67,15 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
             print('exit2')
 
+            # try to combat memory leaking by vgg
+            vgg = tf.keras.applications.VGG16(include_top=False,
+                                          weights='imagenet',
+                                          input_shape=(patch_size[0], patch_size[1], 3))
+            print('exit3.1')
+            
             # use vgg to calculate the feature vectors
             patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
-            print('exit3')
+            print('exit3.2')
 
             # flatten the feature vectors
             patches = patches.reshape((patches.shape[0],pred_dim))
