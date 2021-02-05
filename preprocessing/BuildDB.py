@@ -12,8 +12,6 @@ import gc
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
 
-    patches_per_image_list = list()
-
     # for each patch size we need to do a full run of predictions for each image
     for patch_size in patch_sizes:
 
@@ -33,10 +31,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         test_pred = tf.convert_to_tensor(test_run[:2], dtype=test_run.dtype)
         test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_pred), verbose=0)
         test_loc = get_patch_locations(cv2.imread(paths[0]), patch_size, overlap)
-
-        # save the patches per image so we can do a back calculation later and see what patch came from what image
-        patches_per_image = test_run.shape[0]
-        patches_per_image_list.append(patches_per_image)
 
         # initialize ETA
         eta = round((time.time() - start_time) * len(paths) * 2 / 60, 2)
@@ -62,7 +56,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             else:
                 hfile = f.create_dataset(set_name, test_loc.shape , dtype='i')
             hfile[:] = test_loc
-
 
         # free the variable since we have no further use for it
         del(test_run)
@@ -126,18 +119,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         del(hyperplane_normals)
         gc.collect()
 
-    # save ppi and hash normals
-    patches_per_image_list = np.array(patches_per_image_list)
-
-    with h5py.File("hashes.hdf5", "a") as f:
-        if 'ppi' in f:
-            hfile = f['ppi']
-        else:
-            hfile = f.create_dataset('ppi', patches_per_image_list.shape , dtype='i')
-        hfile[:] = patches_per_image_list
-
     # free variables
-    del(patches_per_image_list)
     gc.collect()
 
 
