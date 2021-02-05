@@ -24,9 +24,8 @@ def buildQuery(paths, hyperplane_normals_list, patch_sizes=[(200,200),(400,400)]
                                       input_shape=(patch_size[0], patch_size[1], 3))
 
         # generate patches via rescaling
-        patches = np.concatenate([cv2.resize(img, patch_size) for img in images])
-        print(patches.shape)
-        print(patch_size)
+        patches = np.array([cv2.resize(img, patch_size) for img in images])
+
         # use vgg to calculate the feature vectors
         patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
         patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
