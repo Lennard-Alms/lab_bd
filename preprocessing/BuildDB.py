@@ -112,7 +112,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         hfile = f.create_dataset('ppi', patches_per_image_list.shape , dtype='i')
         hfile[:] = patches_per_image_list
         hfile = f.create_dataset('hn', hyperplane_normals_list.shape , dtype='f')
-        hfile[:] = patches_per_image_list
+        hfile[:] = hyperplane_normals_list
 
     # free variables
     del(patches_per_image_list)
