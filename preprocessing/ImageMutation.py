@@ -42,7 +42,7 @@ def add_test_image(images, evaluation_patches, prob, sample_size):
 class PatchMutation:
     def __init__(self, patches, mutation_probability=0.2):
         """Takes patches of arbitrary size and mutates incoming images"""
-        self.patches = patches
+        self.patches = [cv2.imread(path) for path in patches]
         self.mutation_probability = mutation_probability
 
     def mutate(self, image):
