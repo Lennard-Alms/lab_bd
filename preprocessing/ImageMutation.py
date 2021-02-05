@@ -45,12 +45,12 @@ class PatchMutation:
         self.patches = patches
         self.mutation_probability = mutation_probability
 
-    def mutate(image):
+    def mutate(self, image):
         is_mutated = False
         if np.random.rand() < prob:
             is_mutated = True
             evaluation_image = None
-            r = np.random.randint(0, self.patches.shape[0])
+            r = np.random.randint(0, len(self.patches))
             evaluation_image = self.patches[r]
             image = add_patch_to_image(image, evaluation_image)
         return image, is_mutated
