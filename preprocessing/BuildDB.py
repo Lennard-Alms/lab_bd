@@ -56,22 +56,28 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
 
             # animation for observing during runtime
             print("Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
+            print('exit0')
 
             # calculate the range of images
             path_idx_start = batch_size * batch_idx
             path_idx_end = path_idx_start + batch_size
+            print('exit1')
 
             # load the images and create the patches
             patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
+            print('exit2')
 
             # use vgg to calculate the feature vectors
             patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
+            print('exit3')
 
             # flatten the feature vectors
             patches = patches.reshape((patches.shape[0],pred_dim))
+            print('exit4')
 
             # calculate the hash signatures
             patches = np.dot(patches, hyperplane_normals) < 0
+            print('exit5')
 
             # save in file with option "a" => read write if exists esle create
             with h5py.File("hashes.hdf5", "w") as f:
@@ -88,6 +94,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                 hfile.resize(hfile.shape[0] + patches.shape[0], axis = 0)
                 hfile[hfile_index:] = patches
 
+            print('exit6')
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
