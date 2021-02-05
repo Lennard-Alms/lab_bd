@@ -30,7 +30,8 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
 
         # make a test run to find output shape for each image this implies that all images have the same dimensions
         test_run = get_patches_from_image(cv2.imread(paths[0]), patch_size, overlap)
-        test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_run[:2]), verbose=0)
+        test_pred = tf.convert_to_tensor(test_run[:2], dtype=test_run.dtype)
+        test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_pred), verbose=0)
 
         # save the patches per image so we can do a back calculation later and see what patch came from what image
         patches_per_image = test_run.shape[0]
