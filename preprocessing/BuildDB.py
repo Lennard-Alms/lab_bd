@@ -109,6 +109,8 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
     patches_per_image_list = np.array(patches_per_image_list)
     hyperplane_normals_list = np.array(hyperplane_normals_list)
     print(hyperplane_normals_list)
+    print(np.array(hyperplane_normals_list))
+    print(np.array(hyperplane_normals_list).shape)
     print(hyperplane_normals_list.shape)
     with h5py.File("hashes.hdf5", "a") as f:
         if 'ppi' in f:
