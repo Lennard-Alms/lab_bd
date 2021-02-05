@@ -42,7 +42,7 @@ def buildQuery(paths, hyperplane_normals_list, patch_sizes=[(200,200),(400,400)]
             if set_name in f:
                 hfile = f[set_name]
             else:
-            hfile = f.create_dataset(set_name, patches.shape , dtype='?')
+                hfile = f.create_dataset(set_name, patches.shape , dtype='?')
             # save the calculated hashes in the h file dataset
             hfile[:] = patches
 
