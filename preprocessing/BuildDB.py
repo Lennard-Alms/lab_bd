@@ -101,11 +101,19 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             del(patches)
             gc.collect()
 
+        # save ppi and hash normals
+        patches_per_image_list = np.array(patches_per_image_list)
+        hyperplane_normals_list = np.array(hyperplane_normals_list)
+        with h5py.File("hashes.hdf5", "w") as f:
+            hfile = f.create_dataset('ppi', patches_per_image_list.shape , dtype='i')
+            hfile[:] = patches_per_image_list
+            hfile = f.create_dataset('hn', hyperplane_normals_list.shape , dtype='f')
+            hfile[:] = patches_per_image_list
         # free variables
         del(vgg)
+        del(patches_per_image_list)
+        del(hyperplane_normals_list)
         gc.collect()
-
-    return patches_per_image_list, hyperplane_normals_list
 
 
 
