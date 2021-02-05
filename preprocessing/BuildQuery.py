@@ -7,7 +7,7 @@ import gc
 # OUTPUT: creates h-file with hash singatures of queries.
 # this assumes that queries contain only relevant parts and no unnecessary background
 # queries are squares
-def buildQuery(paths, hyperplane_normals_list, patch_sizes=[(200,200),(400,400)]):
+def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
 
     # load images
     images = [cv2.imread(path) for path in paths]
@@ -16,7 +16,9 @@ def buildQuery(paths, hyperplane_normals_list, patch_sizes=[(200,200),(400,400)]
         print("Size " + str(patch_size))
 
         # select hyperplane normals for hashing
-        hyperplane_normals = hyperplane_normals_list[normals_index]
+        with h5py.File("hashes.hdf5", "a") as f:
+            set_name = 'hn' + str(patch_size)
+            hyperplane_normals = f[set_name]
 
         # vgg needs a specific input shape thats why we declare it inside the patch loop
         vgg = tf.keras.applications.VGG16(include_top=False,
@@ -48,6 +50,7 @@ def buildQuery(paths, hyperplane_normals_list, patch_sizes=[(200,200),(400,400)]
 
         # free variables
         del(patches)
+        del(hyperplane_normals)
         del(vgg)
         gc.collect()
 

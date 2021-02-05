@@ -11,7 +11,6 @@ import gc
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
 
-    hyperplane_normals_list = list()
     patches_per_image_list = list()
 
     # for each patch size we need to do a full run of predictions for each image
@@ -43,9 +42,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         # calculate the hyperplane normals for hashing
         pred_dim = test_pred.shape[1] * test_pred.shape[2] * test_pred.shape[3]
         hyperplane_normals = np.random.normal(0,1,(pred_dim,signature_size))
-
-        # save hyperplane normals for prediction later
-        hyperplane_normals_list.append(hyperplane_normals)
 
         # free the variable since we have no further use for it
         del(test_run)
@@ -101,26 +97,30 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             del(patches)
             gc.collect()
 
+
+        # save hyperplanes for prediction
+        with h5py.File("hashes.hdf5", "a") as f:
+            set_name = 'hn' + str(patch_size)
+            if set_name in f:
+                hfile = f[set_name]
+            else:
+                hfile = f.create_dataset(set_name, hyperplane_normals.shape , dtype='f')
+            hfile[:] = hyperplane_normals
+
         # free variables
         del(vgg)
+        del(hyperplane_normals)
         gc.collect()
 
     # save ppi and hash normals
     patches_per_image_list = np.array(patches_per_image_list)
-    hyperplane_normals_list = np.concatenate(hyperplane_normals_list)
-    print(hyperplane_normals_list.shape)
-    print(hyperplane_normals_list)
+
     with h5py.File("hashes.hdf5", "a") as f:
         if 'ppi' in f:
             hfile = f['ppi']
         else:
             hfile = f.create_dataset('ppi', patches_per_image_list.shape , dtype='i')
         hfile[:] = patches_per_image_list
-        if 'hn' in f:
-            hfile = f['hn']
-        else:
-            hfile = f.create_dataset('hn', hyperplane_normals_list.shape , dtype='f')
-        hfile[:] = hyperplane_normals_list
 
     # free variables
     del(patches_per_image_list)
