@@ -1,6 +1,7 @@
 import numpy as np
 import cv2
 
+
 def add_patch_to_image(image, patch):
     if patch.shape[2] == 4:
         mask = (patch[:,:,3] != 0)
@@ -36,3 +37,20 @@ def add_test_image(images, evaluation_patches, prob, sample_size):
                 positive.append(i)
                 im = add_patch_to_image(im, evaluation_image)
     return images, positive
+
+
+class PatchMutation:
+    def __init__(self, patches, mutation_probability=0.2):
+        """Takes patches of arbitrary size and mutates incoming images"""
+        self.patches = patches
+        self.mutation_probability = mutation_probability
+
+    def mutate(self, image):
+        is_mutated = False
+        if np.random.rand() < self.mutation_probability:
+            is_mutated = True
+            evaluation_image = None
+            r = np.random.randint(0, len(self.patches))
+            evaluation_image = self.patches[r]
+            image = add_patch_to_image(image, evaluation_image)
+        return image, is_mutated
