@@ -19,7 +19,7 @@ def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
         # select hyperplane normals for hashing
         with h5py.File("hashes.hdf5", "a") as f:
             set_name = 'hn' + str(patch_size)
-            hyperplane_normals = f[set_name]
+            hyperplane_normals = f[set_name][:]
         print('exit1')
         print(hyperplane_normals.shape)
 
