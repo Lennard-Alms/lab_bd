@@ -6,6 +6,7 @@ import sys
 import cv2
 import time
 import h5py
+import gc
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
@@ -46,7 +47,9 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         hyperplane_normals_list.append(hyperplane_normals)
 
         # free the variable since we have no further use for it
-        test_run, test_pred = None, None
+        del(test_run)
+        del(test_pred)
+        gc.collect()
 
         # record time for animation eta
         start_time = time.time()
@@ -56,34 +59,23 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
 
             # animation for observing during runtime
             print("Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
-            print('exit0')
 
             # calculate the range of images
             path_idx_start = batch_size * batch_idx
             path_idx_end = path_idx_start + batch_size
-            print('exit1')
 
             # load the images and create the patches
             patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
-            print('exit2')
 
-            # try to combat memory leaking by vgg
-            vgg = tf.keras.applications.VGG16(include_top=False,
-                                          weights='imagenet',
-                                          input_shape=(patch_size[0], patch_size[1], 3))
-            print('exit3.1')
-            
             # use vgg to calculate the feature vectors
+            patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
             patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
-            print('exit3.2')
 
             # flatten the feature vectors
             patches = patches.reshape((patches.shape[0],pred_dim))
-            print('exit4')
 
             # calculate the hash signatures
             patches = np.dot(patches, hyperplane_normals) < 0
-            print('exit5')
 
             # save in file with option "a" => read write if exists esle create
             with h5py.File("hashes.hdf5", "w") as f:
@@ -100,13 +92,18 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                 hfile.resize(hfile.shape[0] + patches.shape[0], axis = 0)
                 hfile[hfile_index:] = patches
 
+            del(patches)
+            gc.collect()
+
             print('exit6')
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
 
         # free variables
-        patches, vgg = None, None
+        del(patches)
+        del(vgg)
+        gc.collect()
     return patches_per_image_list, hyperplane_normals_list
 
 
