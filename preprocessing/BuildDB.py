@@ -79,10 +79,10 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             # load the images and create the patches
             patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
-            if mutationStrategy:
+            if mutationStrategy is not None:
                 labels = np.zeros(patches.shape[0])
                 for p_idx in range(patches.shape[0]):
-                    patches[p_idx], labels[p_idx] = mutationStrategy.mutate(patch)
+                    patches[p_idx], labels[p_idx] = mutationStrategy.mutate(patches[p_idx])
 
                 with h5py.File("hashes.hdf5", "a") as f:
                     # open h file dataset or create a new one if this is the first iteration
