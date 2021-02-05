@@ -47,9 +47,9 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         hyperplane_normals_list.append(hyperplane_normals)
 
         # free the variable since we have no further use for it
-        del(test_run)
-        del(test_pred)
-        gc.collect()
+        #del(test_run)
+        #del(test_pred)
+        #gc.collect()
 
         # record time for animation eta
         start_time = time.time()
@@ -92,17 +92,16 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                 hfile.resize(hfile.shape[0] + patches.shape[0], axis = 0)
                 hfile[hfile_index:] = patches
 
-            del(patches)
-            gc.collect()
+            #del(patches)
+            #gc.collect()
 
             # calculate eta for the animation
             eta = round((time.time() - start_time) * (max_batches-batch_idx-1) / 60, 2)
             start_time = time.time()
 
         # free variables
-        del(patches)
-        del(vgg)
-        gc.collect()
+        #del(vgg)
+        #gc.collect()
     return patches_per_image_list, hyperplane_normals_list
 
 
