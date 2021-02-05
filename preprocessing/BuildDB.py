@@ -10,7 +10,7 @@ import h5py
 import gc
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
-def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10):
+def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10, mutationStrategy=None):
 
     # for each patch size we need to do a full run of predictions for each image
     for patch_size in patch_sizes:
