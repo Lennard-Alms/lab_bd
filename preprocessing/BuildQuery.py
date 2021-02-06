@@ -21,13 +21,13 @@ def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
             set_name = 'hn' + str(patch_size)
             hyperplane_normals = f[set_name][:]
 
+        # generate patches via rescaling
+        patches = np.array([cv2.resize(img, patch_size) for img in images])
+
         # vgg needs a specific input shape thats why we declare it inside the patch loop
         vgg = tf.keras.applications.VGG16(include_top=False,
                                       weights='imagenet',
                                       input_shape=(patch_size[0], patch_size[1], 3))
-
-        # generate patches via rescaling
-        patches = np.array([cv2.resize(img, patch_size) for img in images])
 
         # use vgg to calculate the feature vectors
         patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
