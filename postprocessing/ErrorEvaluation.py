@@ -39,7 +39,7 @@ def jacc_sim_calc(H, Q):
     j_sim = intersection/union
     indices = np.argsort(-j_sim)
     similarities = j_sim[indices]
-    return indices, similarities
+    return similarities, indices
 
 def hamming_distance(H, Q):
     xor = np.logical_xor(H, Q[np.newaxis,:])
