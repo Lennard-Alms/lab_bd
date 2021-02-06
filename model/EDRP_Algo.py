@@ -16,7 +16,7 @@ class EDRP_Algo:
         self.d2 = d2
         self.k = k
         self.L = L
-        self.signature_size = k*L
+        self.signature_size = k * L
 
     def create_hash_tables(self, hashes):
         self.T = []
@@ -32,8 +32,8 @@ class EDRP_Algo:
 
     def query_for(self, query):
         colisions = set()
-        for l in range(L):
-          hash_key = str(query[k*l:k*(l+1)])
+        for l in range(self.L):
+          hash_key = str( query[ self.k * l : self.k * (l+1) ] )
           for p in self.T[l][hash_key]:
             colisions.add(p)
         return list(colisions)
