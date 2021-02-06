@@ -32,7 +32,7 @@ def calculateError(_sims, _index, positive_indices, steps=100):
     # print("TP, FP, FN, TN", TP, FP, FN, TN)
 
 
-def jacc_sim_calc(H, Q):
+def jaccard_similarity(H, Q):
     M = H * Q[np.newaxis,:]
     intersection = M.sum(axis=1)
     union = H.sum(axis=1) + Q.sum() - intersection
