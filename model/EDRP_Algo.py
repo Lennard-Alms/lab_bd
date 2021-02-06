@@ -34,7 +34,7 @@ class EDRP_Algo:
         colisions = set()
         for l in range(L):
           hash_key = str(query[k*l:k*(l+1)])
-          for p in T[l][hash_key]:
+          for p in self.T[l][hash_key]:
             colisions.add(p)
         return list(colisions)
 
