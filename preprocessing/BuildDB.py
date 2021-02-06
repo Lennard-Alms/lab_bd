@@ -13,10 +13,6 @@ import gc
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10, mutationStrategy=None):
 
-    with h5py.File('hashes.hdf5', 'w') as f:
-        f.create_dataset(set_name, test_loc.shape , dtype='i')
-
-
     # for each patch size we need to do a full run of predictions for each image
     for patch_size_idx, patch_size in enumerate(patch_sizes):
 
@@ -44,9 +40,8 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         pred_dim = test_pred.shape[1] * test_pred.shape[2] * test_pred.shape[3]
         hyperplane_normals = np.random.normal(0,1,(pred_dim,signature_size))
 
-
+        # write over the old file if we are in the first iteration - deletes the old h file
         open_strat = 'w' if patch_size_idx == 0 else 'a'
-
 
         with h5py.File('hashes.hdf5', open_strat) as f:
             # save hyperplanes for prediction
