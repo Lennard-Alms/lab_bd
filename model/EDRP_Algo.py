@@ -12,7 +12,7 @@ class EDRP_Algo:
         roh = np.log2(p1) / np.log2(p2)
         L = int(np.ceil((n ** roh) / p1))
         delta = 1/np.e
-        print('With probability ' + round(1-delta,2) + ' this will return at least one epsilon nearest neighbour if one exists.')
+        print('With probability ' + str(round(1-delta,2)) + ' this will return at least one epsilon nearest neighbour if one exists.')
         self.d2 = d2
         self.k = k
         self.L = L
