@@ -24,7 +24,7 @@ def calculateError(j_sims, j_index, positive_indices, steps=100):
         recall = (TP/(TP+FN))
         accuracy = ((TP + TN)/(TP + TN + FP + FN))
         precisions.append(precision)
-        recalls.append(recalls)
+        recalls.append(recall)
         accuracies.append(accuracy)
 
     return recalls, precisions, accuracies, space
