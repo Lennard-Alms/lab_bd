@@ -14,10 +14,10 @@ def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
     images = [get_image(path) for path in paths]
 
     for normals_index, patch_size in enumerate(patch_sizes):
-        print("Size " + str(patch_size))
+        print('Size ' + str(patch_size))
 
         # select hyperplane normals for hashing
-        with h5py.File("hashes.hdf5", "a") as f:
+        with h5py.File('hashes.hdf5', 'a') as f:
             set_name = 'hn' + str(patch_size)
             hyperplane_normals = f[set_name][:]
 
@@ -39,9 +39,9 @@ def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
         # calculate the hash signatures
         patches = np.dot(patches, hyperplane_normals) < 0
 
-        # save in file with option "a" => read write if exists esle create
+        # save in file with option 'a' => read write if exists esle create
         set_name = 'Q' + str(patch_size)
-        with h5py.File("hashes.hdf5", "a") as f:
+        with h5py.File('hashes.hdf5', 'a') as f:
             if set_name in f:
                 hfile = f[set_name]
             else:

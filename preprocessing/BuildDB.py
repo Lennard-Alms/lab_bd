@@ -13,8 +13,12 @@ import gc
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10, mutationStrategy=None):
 
+    with h5py.File('hashes.hdf5', 'w') as f:
+        f.create_dataset(set_name, test_loc.shape , dtype='i')
+
+
     # for each patch size we need to do a full run of predictions for each image
-    for patch_size in patch_sizes:
+    for patch_size_idx, patch_size in enumerate(patch_sizes):
 
         # vgg needs a specific input shape thats why we declare it inside the patch loop
         vgg = tf.keras.applications.VGG16(include_top=False,
@@ -41,7 +45,10 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         hyperplane_normals = np.random.normal(0,1,(pred_dim,signature_size))
 
 
-        with h5py.File("hashes.hdf5", "a") as f:
+        open_strat = 'w' if patch_size_idx == 0 else 'a'
+
+
+        with h5py.File('hashes.hdf5', open_strat) as f:
             # save hyperplanes for prediction
             set_name = 'hn' + str(patch_size)
             if set_name in f:
@@ -71,7 +78,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         for batch_idx in range(max_batches):
 
             # animation for observing during runtime
-            print("Size " + str(patch_size) + " Batch " + str(batch_idx+1) + "/" + str(max_batches) + " ETA: " + str(eta) + " min")
+            print('Size ' + str(patch_size) + ' Batch ' + str(batch_idx+1) + '/' + str(max_batches) + ' ETA: ' + str(eta) + ' min')
 
             # calculate the range of images
             path_idx_start = batch_size * batch_idx
@@ -85,7 +92,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                 for p_idx in range(patches.shape[0]):
                     patches[p_idx], labels[p_idx] = mutationStrategy.mutate(patches[p_idx])
 
-                with h5py.File("hashes.hdf5", "a") as f:
+                with h5py.File('hashes.hdf5', 'a') as f:
                     # open h file dataset or create a new one if this is the first iteration
                     set_name = 'lab' + str(patch_size)
                     if set_name in f:
@@ -112,15 +119,16 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             # calculate the hash signatures
             patches = np.dot(patches, hyperplane_normals) < 0
 
-            # save in file with option "a" => read write if exists esle create
-            with h5py.File("hashes.hdf5", "a") as f:
+            # save in file with option 'a' => read write if exists esle create
+            with h5py.File('hashes.hdf5', 'a') as f:
 
                 # open h file dataset or create a new one if this is the first iteration
-                if str(patch_size) in f:
-                    hfile = f[str(patch_size)]
+                set_name = 'db' + str(patch_size)
+                if set_name in f:
+                    hfile = f[set_name]
                 else:
                     # save as boolean file with '?' parameter
-                    hfile = f.create_dataset(str(patch_size), (0, signature_size) , dtype='?', maxshape=(None, signature_size))
+                    hfile = f.create_dataset(set_name, (0, signature_size) , dtype='?', maxshape=(None, signature_size))
 
                 # save the calculated hashes in the h file dataset
                 hfile_index = hfile.shape[0]
