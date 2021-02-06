@@ -1,21 +1,21 @@
 import numpy as np
 
 
-def calculateError(j_sims, j_index, positive_indices, steps=100):
-    space = np.linspace(j_sims[-1],j_sims[0],steps)
+def calculateError(_sims, _index, positive_indices, steps=100):
+    space = np.linspace(_sims[-1],_sims[0],steps)
     precisions = []
     accuracies = []
     recalls = []
     for sim in space:
         TP,TN,FP,FN = 0,0,0,0
-        for i in range(len(j_index)):
-            if j_sims[i] >= sim:
-                if j_index[i] in positive_indices:
+        for i in range(len _index)):
+            if _sims[i] >= sim:
+                if _index[i] in positive_indices:
                     TP += 1
                 else:
                     FP += 1
             else:
-                if j_index[i] in positive_indices:
+                if _index[i] in positive_indices:
                     FN += 1
                 else:
                     TN += 1
@@ -48,7 +48,7 @@ def hamming_distance(H, Q):
 
 def hamming_similarity(H, Q):
     distances = hamming_distance(H, Q)
-    similarities = distances / H.shape[1]
+    similarities = 1 - distances / H.shape[1]
     indices = np.argsort(-similarities)
     similarities = similarities[indices]
     return similarities, indices
