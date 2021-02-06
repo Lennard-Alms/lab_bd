@@ -10,12 +10,12 @@ def calculateError(j_sims, j_index, positive_indices, steps=100):
         TP,TN,FP,FN = 0,0,0,0
         for i in range(len(j_index)):
             if j_sims[i] >= sim:
-                if j_index[i] in positives:
+                if j_index[i] in positive_indices:
                     TP += 1
                 else:
                     FP += 1
             else:
-                if j_index[i] in positives:
+                if j_index[i] in positive_indices:
                     FN += 1
                 else:
                     TN += 1

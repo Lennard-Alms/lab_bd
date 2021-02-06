@@ -40,7 +40,7 @@ def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
         patches = np.dot(patches, hyperplane_normals) < 0
 
         # save in file with option 'a' => read write if exists esle create
-        set_name = 'Q' + str(patch_size)
+        set_name = 'q' + str(patch_size)
         with h5py.File('hashes.hdf5', 'a') as f:
             if set_name in f:
                 hfile = f[set_name]
