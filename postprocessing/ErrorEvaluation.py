@@ -47,7 +47,7 @@ def cosine_distance(H, Q):
     distances = np.dot(H, Q) / (H_length * Q_length)
     distances[np.where(distances > 1)] = 1
     distances[np.where(distances < -1)] = -1
-    return np.arccos()
+    return np.arccos(distances)
 
 def hamming_distance(H, Q):
     xor = np.logical_xor(H, Q[np.newaxis,:])
