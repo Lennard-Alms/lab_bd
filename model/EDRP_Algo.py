@@ -23,7 +23,7 @@ class EDRP_Algo:
         for l in range(self.L):
           t = {}
           for p in range(hashes.shape[0]):
-            hash_key = str(hashes[p,k*l:k*(l+1)])
+            hash_key = str( hashes[ p, self.k * l : self.k * (l+1) ] )
             if hash_key in t:
               t[hash_key].append(p)
             else:
