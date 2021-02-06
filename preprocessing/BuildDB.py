@@ -9,6 +9,13 @@ import time
 import h5py
 import gc
 
+def get_image(path_or_image):
+    if isinstance(path_or_image, str):
+        return cv2.imread(path_or_image)
+    else:
+        return path_or_image
+
+
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10, mutationStrategy=None):
 
@@ -27,10 +34,10 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
         start_time = time.time()
 
         # make a test run to find output shape for each image this implies that all images have the same dimensions
-        test_run = get_patches_from_image(cv2.imread(paths[0]), patch_size, overlap)
+        test_run = get_patches_from_image(get_image(paths[0]), patch_size, overlap)
         test_pred = tf.convert_to_tensor(test_run[:2], dtype=test_run.dtype)
         test_pred = vgg.predict(tf.keras.applications.vgg16.preprocess_input(test_pred), verbose=0)
-        test_loc = get_patch_locations(cv2.imread(paths[0]), patch_size, overlap)
+        test_loc = get_patch_locations(get_image(paths[0]), patch_size, overlap)
 
         # initialize ETA
         eta = round((time.time() - start_time) * len(paths) * 2 / 60, 2)
@@ -77,7 +84,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             path_idx_end = path_idx_start + batch_size
 
             # load the images and create the patches
-            patches = np.concatenate([get_patches_from_image(cv2.imread(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
+            patches = np.concatenate([get_patches_from_image(get_image(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
             if mutationStrategy is not None:
                 labels = np.zeros(patches.shape[0])
