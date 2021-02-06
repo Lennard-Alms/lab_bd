@@ -1,3 +1,4 @@
+from .HelperFunctions import get_image
 import tensorflow as tf
 import numpy as np
 import cv2
@@ -10,23 +11,23 @@ import gc
 def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
 
     # load images
-    images = [cv2.imread(path) for path in paths]
+    images = [get_image(path) for path in paths]
 
     for normals_index, patch_size in enumerate(patch_sizes):
-        print("Size " + str(patch_size))
+        print('Size ' + str(patch_size))
 
         # select hyperplane normals for hashing
-        with h5py.File("hashes.hdf5", "a") as f:
+        with h5py.File('hashes.hdf5', 'a') as f:
             set_name = 'hn' + str(patch_size)
             hyperplane_normals = f[set_name][:]
+
+        # generate patches via rescaling
+        patches = np.array([cv2.resize(img, patch_size) for img in images])
 
         # vgg needs a specific input shape thats why we declare it inside the patch loop
         vgg = tf.keras.applications.VGG16(include_top=False,
                                       weights='imagenet',
                                       input_shape=(patch_size[0], patch_size[1], 3))
-
-        # generate patches via rescaling
-        patches = np.array([cv2.resize(img, patch_size) for img in images])
 
         # use vgg to calculate the feature vectors
         patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
@@ -38,9 +39,9 @@ def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
         # calculate the hash signatures
         patches = np.dot(patches, hyperplane_normals) < 0
 
-        # save in file with option "a" => read write if exists esle create
-        set_name = 'Q' + str(patch_size)
-        with h5py.File("hashes.hdf5", "a") as f:
+        # save in file with option 'a' => read write if exists esle create
+        set_name = 'q' + str(patch_size)
+        with h5py.File('hashes.hdf5', 'a') as f:
             if set_name in f:
                 hfile = f[set_name]
             else:
