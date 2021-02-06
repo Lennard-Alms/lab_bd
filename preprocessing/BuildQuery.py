@@ -10,7 +10,7 @@ import gc
 def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
 
     # load images
-    images = [cv2.imread(path) for path in paths]
+    images = [get_image(path) for path in paths]
 
     for normals_index, patch_size in enumerate(patch_sizes):
         print("Size " + str(patch_size))

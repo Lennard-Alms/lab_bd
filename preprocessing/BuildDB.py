@@ -4,16 +4,9 @@ import tensorflow as tf
 import math
 import numpy as np
 import sys
-import cv2
 import time
 import h5py
 import gc
-
-def get_image(path_or_image):
-    if isinstance(path_or_image, str):
-        return cv2.imread(path_or_image)
-    else:
-        return path_or_image
 
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
