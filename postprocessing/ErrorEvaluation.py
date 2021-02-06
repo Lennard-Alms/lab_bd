@@ -8,7 +8,7 @@ def calculateError(_sims, _index, positive_indices, steps=100):
     recalls = []
     for sim in space:
         TP,TN,FP,FN = 0,0,0,0
-        for i in range(len _index)):
+        for i in range(len(_index)):
             if _sims[i] >= sim:
                 if _index[i] in positive_indices:
                     TP += 1
