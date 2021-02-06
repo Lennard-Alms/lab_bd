@@ -41,6 +41,11 @@ def jaccard_similarity(H, Q):
     similarities = j_sim[indices]
     return similarities, indices
 
+def cosine_distance(H, Q):
+    H_length = np.linalg.norm(H, axis=1)
+    Q_length = np.linalg.norm(Q, axis=0)
+    return (np.dot(H, Q) / (H_length * Q_length))
+
 def hamming_distance(H, Q):
     xor = np.logical_xor(H, Q[np.newaxis,:])
     distances = xor.sum(axis=1)
