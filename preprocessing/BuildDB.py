@@ -1,5 +1,6 @@
 from .HelperFunctions import get_patches_from_image
 from .HelperFunctions import get_patch_locations
+from .HelperFunctions import get_image
 import tensorflow as tf
 import math
 import numpy as np
