@@ -36,7 +36,7 @@ class EDRP_Algo:
           hash_key = str( query[ self.k * l : self.k * (l+1) ] )
           for p in self.T[l][hash_key]:
             colisions.add(p)
-        return list(colisions)
+        return np.array(list(colisions))
 
 
 
