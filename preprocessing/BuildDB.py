@@ -80,9 +80,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             path_idx_end = path_idx_start + batch_size
 
             # load the images and create the patches
-            patches = [get_patches_from_image(get_image(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]]
-
-            patches = np.concatenate([cv2.resize(pat, (200,200)) for pat in patches])
+            patches = np.concatenate([get_patches_from_image(get_image(path), patch_size, overlap) for path in paths[path_idx_start:path_idx_end]])
 
             if mutationStrategy is not None:
                 labels = np.zeros(patches.shape[0])
