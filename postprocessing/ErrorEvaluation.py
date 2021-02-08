@@ -32,13 +32,17 @@ def calculateError(_sims, _index, positive_indices, steps=100):
     # print("TP, FP, FN, TN", TP, FP, FN, TN)
 
 
-def jaccard_similarity(H, Q):
+def jaccard_similarity(H, Q, sort=True):
     M = H * Q[np.newaxis,:]
     intersection = M.sum(axis=1)
     union = H.sum(axis=1) + Q.sum() - intersection
     j_sim = intersection/union
-    indices = np.argsort(-j_sim)
-    similarities = j_sim[indices]
+    if sort:
+        indices = np.argsort(-j_sim)
+        similarities = j_sim[indices]
+    else:
+        idices = np.arange(H.shape[0])
+        similarities = j_sim
     return similarities, indices
 
 def cosine_distance(H, Q):
