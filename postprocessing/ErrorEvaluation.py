@@ -36,13 +36,12 @@ def jaccard_similarity(H, Q, sort=True):
     M = H * Q[np.newaxis,:]
     intersection = M.sum(axis=1)
     union = H.sum(axis=1) + Q.sum() - intersection
-    j_sim = intersection/union
+    similarities = intersection/union
     if sort:
-        indices = np.argsort(-j_sim)
-        similarities = j_sim[indices]
+        indices = np.argsort(-similarities)
+        similarities = similarities[indices]
     else:
         idices = np.arange(H.shape[0])
-        similarities = j_sim
     return similarities, indices
 
 def cosine_distance(H, Q):
@@ -58,9 +57,12 @@ def hamming_distance(H, Q):
     distances = xor.sum(axis=1)
     return distances
 
-def hamming_similarity(H, Q):
+def hamming_similarity(H, Q, sort=True):
     distances = hamming_distance(H, Q)
     similarities = 1 - distances / H.shape[1]
-    indices = np.argsort(-similarities)
-    similarities = similarities[indices]
+    if sort:
+        indices = np.argsort(-similarities)
+        similarities = similarities[indices]
+    else:
+        idices = np.arange(H.shape[0])
     return similarities, indices
