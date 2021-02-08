@@ -41,7 +41,7 @@ def jaccard_similarity(H, Q, sort=True):
         indices = np.argsort(-similarities)
         similarities = similarities[indices]
     else:
-        idices = np.arange(H.shape[0])
+        indices = np.arange(H.shape[0])
     return similarities, indices
 
 def cosine_distance(H, Q):
@@ -64,5 +64,5 @@ def hamming_similarity(H, Q, sort=True):
         indices = np.argsort(-similarities)
         similarities = similarities[indices]
     else:
-        idices = np.arange(H.shape[0])
+        indices = np.arange(H.shape[0])
     return similarities, indices
