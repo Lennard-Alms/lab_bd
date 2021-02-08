@@ -27,7 +27,7 @@ def buildQuery(paths, patch_sizes=[(200,200),(400,400)]):
         # vgg needs a specific input shape thats why we declare it inside the patch loop
         vgg = tf.keras.applications.VGG16(include_top=False,
                                       weights='imagenet',
-                                      input_shape=((200,200, 3))
+                                      input_shape=(200,200, 3))
 
         # use vgg to calculate the feature vectors
         patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
