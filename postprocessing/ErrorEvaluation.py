@@ -19,7 +19,9 @@ def calculateError(_sims, _index, positive_indices, steps=100):
                     FN += 1
                 else:
                     TN += 1
-
+                    
+        TN = len(_sims) - len(positive_indices)
+        TP = len(positive_indices)
         precision = TP/(TP+FP)
         recall = (TP/(TP+FN))
         accuracy = ((TP + TN)/(TP + TN + FP + FN))
