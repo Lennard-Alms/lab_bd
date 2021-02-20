@@ -2,10 +2,7 @@ import numpy as np
 import math
 
 class EDRP_Algo:
-    def __init__(self, n, eps=2, d1=0.5):
-        #eps = 2
-        #d1 = np.pi / 6
-        d2 = eps * d1
+    def __init__(self, n, d1=0.5, d2=0.7):
         p1 = 1 - d1 / np.pi
         p2 = 1 - d2 / np.pi
         k = int(math.ceil(- np.log2(n) / np.log2(p2)))
