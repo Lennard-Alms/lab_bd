@@ -2,7 +2,7 @@ import numpy as np
 
 
 def calculateError(_sims, _index, positive_indices, steps=100):
-    space = np.linspace(sims[-1],sims[1],steps)
+    space = np.linspace(0,1,steps)
     precisions = []
     accuracies = []
     recalls = []
