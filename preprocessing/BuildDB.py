@@ -8,18 +8,18 @@ import sys
 import time
 import h5py
 import gc
-
+import cv2
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10, mutationStrategy=None):
 
+    # all patches are resized to 200x200
+    vgg = tf.keras.applications.VGG16(include_top=False,
+                                  weights='imagenet',
+                                  input_shape=(200, 200, 3))
+
     # for each patch size we need to do a full run of predictions for each image
     for patch_size_idx, patch_size in enumerate(patch_sizes):
-
-        # vgg needs a specific input shape thats why we declare it inside the patch loop
-        vgg = tf.keras.applications.VGG16(include_top=False,
-                                      weights='imagenet',
-                                      input_shape=(patch_size[0], patch_size[1], 3))
 
         # caluclate the maximum ammount of loops untill we have all images
         max_batches = math.ceil(len(paths) / batch_size)
@@ -102,8 +102,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
                     hfile[hfile_index:] = labels
 
 
-
-
             # use vgg to calculate the feature vectors
             patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
             patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
@@ -139,11 +137,11 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
             gc.collect()
 
         # free variables
-        del(vgg)
         del(hyperplane_normals)
         gc.collect()
 
     # free variables
+    del(vgg)
     gc.collect()
 
 

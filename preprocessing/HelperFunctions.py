@@ -27,6 +27,7 @@ def get_patches_from_image(image, window_size, window_overlap):
             x_start = int(np.maximum(x_center - window_size[1] // 2, 0))
             x_end = int(np.minimum(x_center + window_size[1] // 2, image.shape[1]))
             patch = image[y_start:y_end, x_start:x_end]
+            patch = cv2.resize(patch, (200,200))
             patches.append(patch)
     return np.array(patches)
 
@@ -67,6 +68,7 @@ def predict_w_vgg(patches, patch_size):
                                   input_shape=(patch_size[0], patch_size[1], 3))
     patches = tf.convert_to_tensor(patches, dtype=patches.dtype)
     patches = vgg.predict(tf.keras.applications.vgg16.preprocess_input(patches), verbose=1)
+    patches = patches.reshape((patches.shape[0],-1))
     del(vgg)
     gc.collect()
     return patches
