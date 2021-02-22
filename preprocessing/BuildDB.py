@@ -148,12 +148,6 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
     gc.collect()
 
 
-def buildDBE2E():
-
-
-
-
-
 
 
 
