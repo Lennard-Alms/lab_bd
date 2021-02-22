@@ -32,7 +32,6 @@ def calculateError(_sims, _index, positive_indices, steps=100):
     # print("recall,", "precision,", "accuracy,", recall, precision, accuracy)
     # print("TP, FP, FN, TN", TP, FP, FN, TN)
 
-
 def jaccard_similarity(H, Q, sort=True):
     M = H * Q[np.newaxis,:]
     intersection = M.sum(axis=1)

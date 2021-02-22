@@ -9,6 +9,9 @@ import time
 import h5py
 import gc
 import cv2
+from tensorflow.keras import layers
+import keras
+from keras.engine.topology import Layer
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
 def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_size=4096, batch_size=10, mutationStrategy=None):
@@ -143,6 +146,10 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
     # free variables
     del(vgg)
     gc.collect()
+
+
+def buildDBE2E():
+
 
 
 
