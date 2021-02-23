@@ -126,7 +126,8 @@ def vgg_r_mac(in_shape, exp, sum=True):
         return keras.models.Model(vgg.input, nomalized)
 
     else:
-
+        print(exp_out.shape)
+        print(halfs, quater, eights)
         return keras.models.Model(vgg.input, [pool_halfs,pool_quater,pool_eights])
 
 
