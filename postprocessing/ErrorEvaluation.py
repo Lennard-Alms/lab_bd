@@ -44,13 +44,13 @@ def jaccard_similarity(H, Q, sort=True):
         indices = np.arange(H.shape[0])
     return similarities, indices
 
-def cosine_distance(H, Q, normalized=False, via_hash=False):
+def cosine_distance(H, Q, normalized=True, via_hash=False):
     if via_hash:
         return hamming_distance(H, Q) * np.pi / H.shape[1]
     if normalized:
-        return np.arccos(np.dot(H,Q[np.newaxis,:]).flatten())
+        return np.arccos(np.dot(H,Q).flatten())
     else:
-        return np.arccos(np.dot(H,Q[np.newaxis,:]).flatten() / (np.linalg.norm(H, axis=1) * np.linalg.norm(Q)))
+        return np.arccos(np.dot(H,Q).flatten() / (np.linalg.norm(H, axis=1) * np.linalg.norm(Q)))
 
 def sort_by_distance(distances):
     indices = np.argsort(distances)
