@@ -148,7 +148,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
     gc.collect()
 
 
-def extract_features(input_images, model, batch_size=20, network_batch_size=5):
+def extract_features(input_images, model, batch_size=20, network_batch_size=5, concat=True):
 
     features_collection = []
 
@@ -166,7 +166,10 @@ def extract_features(input_images, model, batch_size=20, network_batch_size=5):
       del(features)
       gc.collect()
 
-    return np.concatenate(features_collection)
+    if concat:
+        return np.concatenate(features_collection)
+    else:
+        return features_collection
 
 
 
