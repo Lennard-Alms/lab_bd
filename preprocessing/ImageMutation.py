@@ -41,9 +41,12 @@ def add_test_image(images, evaluation_patches, prob, sample_size):
 
 
 class PatchMutation:
-    def __init__(self, patches, mutation_probability=0.2):
+    def __init__(self, patches, mutation_probability=0.2, size=None):
         """Takes patches of arbitrary size and mutates incoming images"""
         self.patches = [get_image(path) for path in patches]
+        if size is not None:
+            for i, patch in enumerate(self.patches):
+                self.patches[i] = cv2.resize(patch, size)
         self.mutation_probability = mutation_probability
 
     def mutate(self, image):
