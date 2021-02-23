@@ -3,7 +3,7 @@ import numpy as np
 from tensorflow.keras import layers
 import keras
 from keras.engine.topology import Layer
-
+import math
 
 class GeM(Layer):
     def __init__(self, exp, **kwargs):
