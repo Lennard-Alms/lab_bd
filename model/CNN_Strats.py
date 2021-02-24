@@ -114,7 +114,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
         atten = normalize_model(atten)
         return keras.models.Model(vgg.input, atten)
 
-    if vgg_output and attention and rmac:
+    if vgg_output and attention and regions:
         vgg_out = rmac_model(vgg_out)
         atten = rmac_model(atten)
         c0 = combine_model([vgg_out[0], atten[0]])
@@ -125,11 +125,11 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
         c2 = normalize_model(c2)
         return keras.models.Model(vgg.input, [c0,c1,c2])
 
-    if vgg_output and rmac:
+    if vgg_output and regions:
         vgg_out = rmac_model(vgg_out)
         return keras.models.Model(vgg.input, vgg_out)
 
-    if attention and rmac:
+    if attention and regions:
         atten = rmac_model(atten)
         return keras.models.Model(vgg.input, atten)
 
