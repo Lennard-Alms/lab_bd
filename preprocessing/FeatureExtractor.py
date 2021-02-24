@@ -3,6 +3,7 @@ from tensorflow.keras import backend as K
 from tensorflow.keras import layers
 import numpy as np
 import gc
+from .HelperFunctions import get_image
 
 class VGGFeatureExtractorMax:
     def __init__(self, window_size=(200,200), mutation_strategy = None):
@@ -38,11 +39,13 @@ class VGGFeatureExtractorMax:
 
     def execute(self, items):
         labels = []
+        images = [get_image(item) for item in items]
+        images = np.array(images)
         if self.mutation_strategy is not None:
-            for item in items:
+            for item in images:
                 item, label = self.mutation_strategy.mutate(item)
                 labels.append(label)
-        prep = tf.keras.applications.vgg16.preprocess_input(items)
+        prep = tf.keras.applications.vgg16.preprocess_input(images)
         labels = np.array(labels)[:,np.newaxis]
         gc.collect()
         return self.model.predict(prep), labels
