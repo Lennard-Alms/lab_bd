@@ -11,88 +11,32 @@ class GeM(Layer):
         self.exp = exp
 
     def call(self, x, mask=None):
-        return tf.reduce_mean(x ** self.exp, axis=1) ** (1/self.exp)
+        return tf.reduce_mean(x ** self.exp, axis=(1,2)) ** (1/self.exp)
 
     def get_output_shape_for(self, input_shape):
         return (input_shape[0], input_shape[2])
 
+def normalize_model(tensor_in):
+    return layers.Lambda(lambda x: tf.linalg.normalize(x, axis=3)[0])(tensor_in)
 
+def combine_model(tensor_list_in):
+    return layers.Lambda(lambda x: tf.add_n(x))(tensor_list_in)
 
-def vgg_vgg_att_gem(in_shape, exp):
-    vgg = tf.keras.applications.VGG19(include_top=False,
-                                      weights='imagenet',
-                                      input_shape=in_shape)
+def reduce_model(tensor_in):
+    return layers.Lambda(lambda x: tf.math.reduce_sum(x, axis=(1,2)))(tensor_in)
 
-    vgg_out = layers.Reshape((-1, vgg.output_shape[3]))(vgg.get_layer('block5_conv4').output)
-    direct = GeM(exp)(vgg_out)
+def self_attention_model(tensor_in):
+    atten = layers.Reshape((-1, vgg_out.output_shape[3]))(tensor_in)
+    atten = layers.Attention()([atten,atten])
+    atten = layers.Reshape(vgg.get_layer('block5_conv4').output_shape)(atten)
+    return atten
 
-    atten = layers.Attention()([vgg_out,vgg_out])
-    atten = GeM(exp)(atten)
+def mac_model(tensor_in, exp):
+    gem = GeM(exp)(tensor_in)
+    return gem
 
-    combined = layers.Lambda(lambda x: x[0] + x[1])([direct, atten])
-
-    nomalized = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=1)[0])(combined)
-
-    model = keras.models.Model(vgg.input, nomalized)
-
-    return model
-
-def vgg_vgg_att_l2_gem(in_shape, exp):
-    vgg = tf.keras.applications.VGG19(include_top=False,
-                                      weights='imagenet',
-                                      input_shape=in_shape)
-
-    vgg_out = layers.Reshape((-1, vgg.output_shape[3]))(vgg.get_layer('block5_conv4').output)
-    direct = GeM(exp)(vgg_out)
-
-    atten = layers.Attention()([vgg_out,vgg_out])
-    atten = GeM(exp)(atten)
-
-    combined = layers.Lambda(lambda x: tf.linalg.normalize(x[0], axis=1)[0] + tf.linalg.normalize(x[1], axis=1)[0])([direct, atten])
-
-    nomalized = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=1)[0])(combined)
-
-    model = keras.models.Model(vgg.input, nomalized)
-
-    return model
-
-def vgg_att_gem(in_shape, exp):
-    vgg = tf.keras.applications.VGG19(include_top=False,
-                                      weights='imagenet',
-                                      input_shape=in_shape)
-
-    vgg_out = layers.Reshape((-1, vgg.output_shape[3]))(vgg.get_layer('block5_conv4').output)
-
-    atten = layers.Attention()([vgg_out,vgg_out])
-    atten = GeM(exp)(atten)
-
-    nomalized = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=1)[0])(atten)
-
-    model = keras.models.Model(vgg.input, nomalized)
-
-    return model
-
-def vgg_gem(in_shape, exp):
-    vgg = tf.keras.applications.VGG19(include_top=False,
-                                      weights='imagenet',
-                                      input_shape=in_shape)
-
-    vgg_out = layers.Reshape((-1, vgg.output_shape[3]))(vgg.get_layer('block5_conv4').output)
-
-    gem = GeM(exp)(vgg_out)
-
-    nomalized = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=1)[0])(gem)
-
-    model = keras.models.Model(vgg.input, nomalized)
-
-    return model
-
-def vgg_r_mac(in_shape, exp, sum=True):
-    vgg = tf.keras.applications.VGG19(include_top=False,
-                                          weights='imagenet',
-                                          input_shape=in_shape)
-
-    exp_out = layers.Lambda(lambda x: x ** exp)(vgg.get_layer('block5_conv4').output)
+def rmac_model(tensor_in, exp):
+    exp_out = layers.Lambda(lambda x: x ** exp)(tensor_in)
 
     long_side = max(exp_out.shape[1], exp_out.shape[2])
 
@@ -109,27 +53,85 @@ def vgg_r_mac(in_shape, exp, sum=True):
     pool_quater = layers.Lambda(lambda x: x ** (1/exp))(pool_quater)
     pool_eights = layers.Lambda(lambda x: x ** (1/exp))(pool_eights)
 
-    pool_halfs = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=3)[0])(pool_halfs)
-    pool_quater = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=3)[0])(pool_quater)
-    pool_eights = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=3)[0])(pool_eights)
+    pool_halfs = normalize_model(pool_halfs)
+    pool_quater = normalize_model(pool_quater)
+    pool_eights = normalize_model(pool_eights)
 
-    if sum:
+    return [pool_halfs, pool_quater, pool_eights]
 
-        pool_halfs = layers.Lambda(lambda x: tf.math.reduce_sum(x, axis=(1,2)))(pool_halfs)
-        pool_quater = layers.Lambda(lambda x: tf.math.reduce_sum(x, axis=(1,2)))(pool_quater)
-        pool_eights = layers.Lambda(lambda x: tf.math.reduce_sum(x, axis=(1,2)))(pool_eights)
 
-        r_mac = layers.Lambda(lambda x: x[0] + x[1] + x[2])([pool_halfs, pool_quater, pool_eights])
 
-        nomalized = layers.Lambda(lambda x: tf.linalg.normalize(x, axis=1)[0])(r_mac)
 
-        return keras.models.Model(vgg.input, nomalized)
+def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rmac=False, regions=False):
+    vgg = tf.keras.applications.VGG19(include_top=False,
+                                          weights='imagenet',
+                                          input_shape=in_shape)
+    vgg>gem>norm + att>gem>norm -> nrom
 
-    else:
-        print(exp_out.shape)
-        print(halfs, quater, eights)
-        return keras.models.Model(vgg.input, [pool_halfs,pool_quater,pool_eights])
+    vgg_out = vgg.get_layer('block5_conv4').output
 
+    if attention:
+        atten = self_attention_model(vgg_out)
+
+    if vgg_output and attention and mac:
+        vgg_out = mac_model(vgg_out, exp)
+        vgg_out = normalize_model(vgg_out)
+        atten = mac_model(atten, exp)
+        atten = normalize_model(atten)
+        combined = combine_model([vgg_out, atten])
+        combined = normalize_model(combined)
+        return keras.models.Model(vgg.input, combined)
+
+    if vgg_output and mac:
+        vgg_out = mac_model(vgg_out, exp)
+        vgg_out = normalize_model(vgg_out)
+        return keras.models.Model(vgg.input, vgg_out)
+
+    if attention and mac:
+        atten = mac_model(atten, exp)
+        atten = normalize_model(atten)
+        return keras.models.Model(vgg.input, atten)
+
+    if vgg_output and attention and rmac:
+        vgg_out = rmac_model(vgg_out)
+        atten = rmac_model(atten)
+        combined = combine_model(vgg_out + atten)
+        combined = reduce_model(vgg_out)
+        combined =  normalize_model(combined)
+        return keras.models.Model(vgg.input, combined)
+
+    if vgg_output and rmac:
+        vgg_out = rmac_model(vgg_out)
+        vgg_out = combine_model(vgg_out)
+        vgg_out = reduce_model(vgg_out)
+        vgg_out = normalize_model(vgg_out)
+        return keras.models.Model(vgg.input, vgg_out)
+
+    if attention and rmac:
+        atten = rmac_model(atten)
+        atten = combine_model(atten)
+        atten = reduce_model(atten)
+        atten = normalize_model(atten)
+        return keras.models.Model(vgg.input, atten)
+
+    if vgg_output and attention and rmac:
+        vgg_out = rmac_model(vgg_out)
+        atten = rmac_model(atten)
+        c0 = combine_model([vgg_out[0], atten[0]])
+        c1 = combine_model([vgg_out[1], atten[1]])
+        c2 = combine_model([vgg_out[2], atten[2]])
+        c0 = normalize_model(c0)
+        c1 = normalize_model(c1)
+        c2 = normalize_model(c2)
+        return keras.models.Model(vgg.input, [c0,c1,c2])
+
+    if vgg_output and rmac:
+        vgg_out = rmac_model(vgg_out)
+        return keras.models.Model(vgg.input, vgg_out)
+
+    if attention and rmac:
+        atten = rmac_model(atten)
+        return keras.models.Model(vgg.input, atten)
 
 
 
