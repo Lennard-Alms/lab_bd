@@ -14,7 +14,6 @@ class VGGFeatureExtractorMax:
         vgg_max_pooling = layers.Lambda(lambda x: K.max(x, axis=(1,2)))(vgg.output)
         vgg_flattened = layers.Flatten()(vgg_max_pooling)
         model = tf.keras.Model([vgg.input], vgg_flattened)
-        print(model.output)
         self.model = model
 
     def get_output_shapes(self):

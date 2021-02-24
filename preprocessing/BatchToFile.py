@@ -36,7 +36,7 @@ class BatchProcessToFile:
             nItems = len(items)
         elif isinstance(items, np.ndarray):
             nItems = items.shape[0]
-
+        print(nItems)
         output_shapes = processor.get_output_shapes()
         postfixes = processor.get_dataset_name_postfixes()
         datasets = self.initialize_dataset(dataset_name, output_shapes, postfixes)
