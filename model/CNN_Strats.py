@@ -66,8 +66,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
     vgg = tf.keras.applications.VGG19(include_top=False,
                                           weights='imagenet',
                                           input_shape=in_shape)
-    vgg>gem>norm + att>gem>norm -> nrom
-
+                                          
     vgg_out = vgg.get_layer('block5_conv4').output
 
     if attention:
