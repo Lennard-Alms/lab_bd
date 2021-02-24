@@ -36,16 +36,20 @@ class VGGFeatureExtractorMax:
             postfixes.append("label")
         return postfixes
 
-
     def execute(self, items):
         labels = []
-        images = [get_image(item) for item in items]
-        images = np.array(images)
+        patches = []
+        for path in items:
+            im = get_image(path)
+            _p = get_patches_from_image(im)
+            patches.append(_p)
+        patches = np.concatenate(patches)
+
         if self.mutation_strategy is not None:
-            for item in images:
+            for item in patches:
                 item, label = self.mutation_strategy.mutate(item)
                 labels.append(label)
-        prep = tf.keras.applications.vgg16.preprocess_input(images)
+        prep = tf.keras.applications.vgg16.preprocess_input(patches)
         labels = np.array(labels)[:,np.newaxis]
         gc.collect()
         return self.model.predict(prep), labels
