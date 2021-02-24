@@ -41,7 +41,7 @@ class VGGFeatureExtractorMax:
         patches = []
         for path in items:
             im = get_image(path)
-            _p = get_patches_from_image(im, window_size=self.window_size, overlap=0.5)
+            _p = get_patches_from_image(im, window_size=self.window_size, window_overlap=0.5)
             patches.append(_p)
         patches = np.concatenate(patches)
 
