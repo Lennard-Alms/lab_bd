@@ -48,7 +48,6 @@ class PatchMutation:
             for i, patch in enumerate(self.patches):
                 self.patches[i] = cv2.resize(patch, size)
         self.mutation_probability = mutation_probability
-
     def mutate(self, image):
         mutation_label = 0
         if np.random.rand() < self.mutation_probability:
