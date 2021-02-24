@@ -8,7 +8,6 @@ class BatchProcessToFile:
         self.filename = filename
         self.f = None
         self.mutation_strategy = None
-        pass
 
     def open_file(self):
         self.f = h5py.File(self.filename,'w')
