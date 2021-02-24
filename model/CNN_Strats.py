@@ -26,8 +26,12 @@ def reduce_model(tensor_in):
     return layers.Lambda(lambda x: tf.math.reduce_sum(x, axis=(1,2)))(tensor_in)
 
 def self_attention_model(tensor_in):
+    print(tensor_in.shape[1:])
+    print(tensor_in.shape[3])
+    print(tensor_in.shape)
     atten = layers.Reshape((-1, tensor_in.shape[3]))(tensor_in)
     atten = layers.Attention()([atten,atten])
+    print(atten.shape)
     atten = layers.Reshape(tensor_in.shape[1:])(atten)
     return atten
 
