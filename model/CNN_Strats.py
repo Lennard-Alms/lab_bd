@@ -17,7 +17,8 @@ class GeM(Layer):
         return (input_shape[0], input_shape[2])
 
 def normalize_model(tensor_in):
-    return layers.Lambda(lambda x: tf.linalg.normalize(x, axis=3)[0])(tensor_in)
+    last_axis = len(tensor_in.shape) - 1
+    return layers.Lambda(lambda x: tf.linalg.normalize(x, axis=last_axis)[0])(tensor_in)
 
 def combine_model(tensor_list_in):
     return layers.Lambda(lambda x: tf.add_n(x))(tensor_list_in)
@@ -26,15 +27,9 @@ def reduce_model(tensor_in):
     return layers.Lambda(lambda x: tf.math.reduce_sum(x, axis=(1,2)))(tensor_in)
 
 def self_attention_model(tensor_in):
-    print(tensor_in.shape[1:])
-    print(tensor_in.shape[3])
-    print(tensor_in.shape)
     atten = layers.Reshape((-1, tensor_in.shape[3]))(tensor_in)
     atten = layers.Attention()([atten,atten])
-    print(atten.shape)
     atten = layers.Reshape(tensor_in.shape[1:])(atten)
-    print(atten.shape)
-
     return atten
 
 def mac_model(tensor_in, exp):
