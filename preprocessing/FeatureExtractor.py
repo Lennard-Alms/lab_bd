@@ -7,6 +7,7 @@ from .HelperFunctions import get_image, get_patches_from_image
 
 class VGGFeatureExtractorMax:
     def __init__(self, window_size=(200,200), mutation_strategy = None):
+        self.window_size = window_size
         self.mutation_strategy = mutation_strategy
         vgg = tf.keras.applications.VGG16(include_top=False,
                                         weights='imagenet',
@@ -40,7 +41,7 @@ class VGGFeatureExtractorMax:
         patches = []
         for path in items:
             im = get_image(path)
-            _p = get_patches_from_image(im)
+            _p = get_patches_from_image(im, window_size=self.window_size, overlap=0.5)
             patches.append(_p)
         patches = np.concatenate(patches)
 
