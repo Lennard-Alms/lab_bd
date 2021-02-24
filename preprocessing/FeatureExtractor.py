@@ -3,7 +3,7 @@ from tensorflow.keras import backend as K
 from tensorflow.keras import layers
 import numpy as np
 import gc
-from .HelperFunctions import get_image
+from .HelperFunctions import get_image, get_patches_from_image
 
 class VGGFeatureExtractorMax:
     def __init__(self, window_size=(200,200), mutation_strategy = None):
