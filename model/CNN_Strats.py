@@ -33,6 +33,8 @@ def self_attention_model(tensor_in):
     atten = layers.Attention()([atten,atten])
     print(atten.shape)
     atten = layers.Reshape(tensor_in.shape[1:])(atten)
+    print(atten.shape)
+
     return atten
 
 def mac_model(tensor_in, exp):
