@@ -68,6 +68,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
                                           input_shape=in_shape)
 
     vgg_out = vgg.get_layer('block5_conv4').output
+    print(vgg_out.shape)
 
     if attention:
         atten = self_attention_model(vgg_out)
