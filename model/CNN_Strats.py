@@ -28,7 +28,7 @@ def reduce_model(tensor_in):
 def self_attention_model(tensor_in):
     atten = layers.Reshape((-1, tensor_in.shape[3]))(tensor_in)
     atten = layers.Attention()([atten,atten])
-    atten = layers.Reshape(tensor_in.shape)(atten)
+    atten = layers.Reshape(tensor_in.shape[1:])(atten)
     return atten
 
 def mac_model(tensor_in, exp):
@@ -68,7 +68,6 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
                                           input_shape=in_shape)
 
     vgg_out = vgg.get_layer('block5_conv4').output
-    print(vgg_out.shape)
 
     if attention:
         atten = self_attention_model(vgg_out)
