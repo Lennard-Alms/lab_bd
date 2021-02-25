@@ -10,7 +10,7 @@ class BatchProcessToFile:
         self.mutation_strategy = None
 
     def open_file(self):
-        self.f = h5py.File(self.filename,'w')
+        self.f = h5py.File(self.filename,'a')
 
     def close_file(self):
         self.f.close()
