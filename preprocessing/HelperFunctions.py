@@ -56,9 +56,18 @@ def get_patch_locations(image, window_size, window_overlap):
             patches.append(np.array([y_start,y_end,x_start,x_end]))
     return np.array(patches)
 
-def get_image(path_or_image):
+def pil_loader(path):
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+    with open(path, 'rb') as f:
+        img = Image.open(f)
+        return img.convert('RGB')
+
+def get_image(path_or_image, pil=False):
     if isinstance(path_or_image, str):
-        return cv2.imread(path_or_image)
+        if pil:
+            return pil_loader(path_or_image)
+        else:
+            return cv2.imread(path_or_image)
     else:
         return path_or_image
 
