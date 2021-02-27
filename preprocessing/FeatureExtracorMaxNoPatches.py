@@ -43,6 +43,7 @@ class VGGFeatureExtractorMaxNoPatches:
         for path in items:
             im = get_image(path)
             im = cv2.resize(im, (self.window_size))
+            print(im.shape)
             patches.append(im)
         patches = np.concatenate(patches)
         print(patches.shape)
