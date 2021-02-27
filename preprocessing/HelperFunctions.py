@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import tensorflow as tf
 import gc
+from PIL import Image, ImageFile
+
 
 def get_patches_from_image(image, window_size, window_overlap):
     number_of_tiles_x = int(math.ceil(image.shape[1] / (window_size[1] * (1 - window_overlap))))

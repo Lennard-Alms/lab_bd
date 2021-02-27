@@ -12,7 +12,6 @@ import cv2
 from tensorflow.keras import layers
 import keras
 from keras.engine.topology import Layer
-from PIL import Image, ImageFile
 
 
 # OUTPUT: creates h-file with hash singatures, returns list of hyperplane normals and list of patches per image
