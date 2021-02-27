@@ -45,7 +45,7 @@ class VGGFeatureExtractorMaxNoPatches:
             im = cv2.resize(im, (self.window_size))
             patches.append(im)
         patches = np.concatenate(patches)
-
+        print(patches.shape)
         if self.mutation_strategy is not None:
             for item in patches:
                 item, label = self.mutation_strategy.mutate(item)
