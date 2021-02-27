@@ -43,7 +43,6 @@ class BatchProcessToFile:
 
         batch_start = 0
         while batch_start < nItems:
-            print(batch_start)
             batch_end = batch_start + batch_size
             result = processor.execute(items[batch_start:batch_end])
             for i,dataset in enumerate(datasets):
