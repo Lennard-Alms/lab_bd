@@ -67,7 +67,7 @@ def pil_loader(path):
 def get_image(path_or_image, pil=False):
     if isinstance(path_or_image, str):
         if pil:
-            return pil_loader(path_or_image)
+            return np.array(pil_loader(path_or_image))
         else:
             return cv2.imread(path_or_image)
     else:
