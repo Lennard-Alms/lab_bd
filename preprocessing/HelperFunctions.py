@@ -64,14 +64,28 @@ def pil_loader(path):
         img = Image.open(f)
         return img.convert('RGB')
 
-def get_image(path_or_image, pil=False):
+def get_image(path_or_image, pil=False, shape=None, fill_option=None):
     if isinstance(path_or_image, str):
         if pil:
-            return np.array(pil_loader(path_or_image))
+            im = np.array(pil_loader(path_or_image))
         else:
-            return cv2.imread(path_or_image)
+            im = cv2.imread(path_or_image)
     else:
-        return path_or_image
+        im = path_or_image
+    if shape is None:
+      return im
+    else:
+      if fill_option == 'resize':
+        return cv2.resize(im, (shape[0],shape[1]))
+      elif fill_option == 'noise':
+        im_o = np.random.randint(0,255, shape).astype('uint8')
+        offset_oh, offset_ow = (im_o.shape[0] - im.shape[0]) // 2, (im_o.shape[1] - im.shape[1]) // 2
+        offset_uh, offset_uw = offset_oh + im.shape[0], offset_ow + im.shape[1]
+        im_o[offset_oh:offset_uh,offset_ow:offset_uw] = im
+        return im_o
+      else:
+        raise ValueError('shaping requires a fill_option, choose one of: resize, noise')
+
 
 def predict_w_vgg(patches, patch_size):
     vgg = tf.keras.applications.VGG16(include_top=False,

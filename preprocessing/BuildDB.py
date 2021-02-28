@@ -149,7 +149,7 @@ def buildDB(paths, patch_sizes=[(200,200),(400,400)], overlap=0.5, signature_siz
     gc.collect()
 
 
-def extract_features(input_images, model, batch_size=20, network_batch_size=5, concat=True, pil=False):
+def extract_features(input_images, model, batch_size=20, network_batch_size=5, concat=True, pil=False, shape=None, fill_option=None):
 
     features_collection = []
 
@@ -159,7 +159,7 @@ def extract_features(input_images, model, batch_size=20, network_batch_size=5, c
       path_idx_start = batch_size * batch_idx
       path_idx_end = path_idx_start + batch_size
 
-      images = np.array([get_image(im, pil) for im in input_images[path_idx_start:path_idx_end]])
+      images = np.array([get_image(im, pil, shape, fill_option) for im in input_images[path_idx_start:path_idx_end]])
 
       features = model.predict(tf.keras.applications.vgg19.preprocess_input(images), verbose=1, batch_size=network_batch_size)
       features_collection.append(features)
