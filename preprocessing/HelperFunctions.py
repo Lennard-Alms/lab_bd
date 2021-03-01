@@ -79,7 +79,7 @@ def get_image(path_or_image, pil=False, shape=None, fill_option=None):
             raise ValueError('shaping requires a fill_option, choose one of: resize, noise, black, white')
         else:
             if fill_option == 'resize':
-                return cv2.resize(im, (shape[0],shape[1]))
+                return cv2.resize(im, (shape[1],shape[10]))
 
             elif fill_option == 'noise':
                 im_o = np.random.randint(0,255, shape).astype('uint8')
