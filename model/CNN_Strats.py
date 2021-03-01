@@ -95,22 +95,31 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
     if vgg_output and attention and rmac:
         vgg_out = rmac_model(vgg_out, exp)
         atten = rmac_model(atten, exp)
-        combined = combine_model(vgg_out + atten)
-        combined = reduce_model(vgg_out)
+        c0 = combine_model([vgg_out[0], atten[0]])
+        c1 = combine_model([vgg_out[1], atten[1]])
+        c2 = combine_model([vgg_out[2], atten[2]])
+        c0 = reduce_model(c0)
+        c1 = reduce_model(c1)
+        c2 = reduce_model(c2)
+        combined = combine_model([c0,c1,c2])
         combined =  normalize_model(combined)
         return keras.models.Model(vgg.input, combined)
 
     if vgg_output and rmac:
         vgg_out = rmac_model(vgg_out, exp)
-        vgg_out = combine_model(vgg_out)
-        vgg_out = reduce_model(vgg_out)
+        c0 = reduce_model(vgg_out[0])
+        c1 = reduce_model(vgg_out[1])
+        c2 = reduce_model(vgg_out[2])
+        vgg_out = combine_model([c0,c1,c2])
         vgg_out = normalize_model(vgg_out)
         return keras.models.Model(vgg.input, vgg_out)
 
     if attention and rmac:
         atten = rmac_model(atten, exp)
-        atten = combine_model(atten)
-        atten = reduce_model(atten)
+        c0 = reduce_model(atten[0])
+        c1 = reduce_model(atten[1])
+        c2 = reduce_model(atten[2])
+        atten = combine_model([c0,c1,c2])
         atten = normalize_model(atten)
         return keras.models.Model(vgg.input, atten)
 

@@ -73,19 +73,25 @@ def get_image(path_or_image, pil=False, shape=None, fill_option=None):
     else:
         im = path_or_image
     if shape is None:
-      return im
+        return im
     else:
-      if fill_option == 'resize':
-        return cv2.resize(im, (shape[0],shape[1]))
-      elif fill_option == 'noise':
-        im_o = np.random.randint(0,255, shape).astype('uint8')
-        offset_oh, offset_ow = (im_o.shape[0] - im.shape[0]) // 2, (im_o.shape[1] - im.shape[1]) // 2
-        offset_uh, offset_uw = offset_oh + im.shape[0], offset_ow + im.shape[1]
-        im_o[offset_oh:offset_uh,offset_ow:offset_uw] = im
-        return im_o
-      else:
-        raise ValueError('shaping requires a fill_option, choose one of: resize, noise')
+        if fill_option is None:
+            raise ValueError('shaping requires a fill_option, choose one of: resize, noise, black, white')
+        else:
+            if fill_option == 'resize':
+                return cv2.resize(im, (shape[0],shape[1]))
 
+            elif fill_option == 'noise':
+                im_o = np.random.randint(0,255, shape).astype('uint8')
+            elif fill_option == 'white':
+                im_o = np.full(shape, 255).astype('uint8')
+            elif fill_option == 'black':
+                im_o = np.zeros(shape).astype('uint8')
+
+            offset_oh, offset_ow = (im_o.shape[0] - im.shape[0]) // 2, (im_o.shape[1] - im.shape[1]) // 2
+            offset_uh, offset_uw = offset_oh + im.shape[0], offset_ow + im.shape[1]
+            im_o[offset_oh:offset_uh,offset_ow:offset_uw] = im
+            return im_o
 
 def predict_w_vgg(patches, patch_size):
     vgg = tf.keras.applications.VGG16(include_top=False,
