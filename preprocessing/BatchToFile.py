@@ -19,7 +19,7 @@ class BatchProcessToFile:
         datasets = []
         self.open_file()
         print(dataset_name)
-        print(output_shapes)
+        # print(output_shapes)
         print(postfixes)
         for i, output_shape in enumerate(output_shapes):
             save_shape = (0,) + output_shape
@@ -27,6 +27,7 @@ class BatchProcessToFile:
             dset_name = dataset_name
             if postfixes[i] != "":
                 dset_name = dset_name + "_" + postfixes[i]
+            print(dset_name)
             # dset_name = dataset_name + "_" + postfixes[i]
             if dataset_name in self.f:
                 dataset = self.f[dataset_name]
