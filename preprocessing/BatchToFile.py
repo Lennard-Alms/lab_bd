@@ -18,6 +18,9 @@ class BatchProcessToFile:
     def initialize_dataset(self, dataset_name, output_shapes, postfixes):
         datasets = []
         self.open_file()
+        print(dataset_name)
+        print(output_shapes)
+        print(postfixes)
         for i, output_shape in enumerate(output_shapes):
             save_shape = (0,) + output_shape
             max_shape = (None,) + output_shape
