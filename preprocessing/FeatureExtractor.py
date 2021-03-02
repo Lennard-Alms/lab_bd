@@ -65,6 +65,7 @@ class VGGFeatureExtractorMax:
                 labels.append(label)
         prep = tf.keras.applications.vgg16.preprocess_input(patches)
         labels = np.array(labels)[:,np.newaxis]
+        print(labels)
         gc.collect()
         return self.model.predict(prep), labels
 
