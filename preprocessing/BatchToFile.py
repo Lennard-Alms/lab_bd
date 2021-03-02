@@ -21,7 +21,10 @@ class BatchProcessToFile:
         for i, output_shape in enumerate(output_shapes):
             save_shape = (0,) + output_shape
             max_shape = (None,) + output_shape
-            dset_name = dataset_name + "_" + postfixes[i]
+            dset_name = dataset_name
+            if postfixes[i] != "":
+                dset_name = dset_name + "_" + postfixes[i]
+            # dset_name = dataset_name + "_" + postfixes[i]
             if dataset_name in self.f:
                 dataset = self.f[dataset_name]
             else:
