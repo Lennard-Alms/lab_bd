@@ -14,6 +14,9 @@ class EDRP_Algo:
         self.k = k
         self.L = L
         self.signature_size = k * L
+        self.p1 = p1
+        self.p2 = p2
+        self.roh = roh
 
     def create_hash_tables(self, hashes):
         self.T = []
