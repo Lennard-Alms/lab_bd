@@ -24,8 +24,6 @@ class BatchProcessToFile:
             dset_name = dataset_name
             if postfixes[i] != "":
                 dset_name = dset_name + "_" + postfixes[i]
-            print(dset_name)
-            # dset_name = dataset_name + "_" + postfixes[i]
             if dset_name in self.f:
                 dataset = self.f[dset_name]
             else:
