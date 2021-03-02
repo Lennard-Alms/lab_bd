@@ -5,17 +5,23 @@ import numpy as np
 import gc
 from .HelperFunctions import get_image, get_patches_from_image
 
+def get_std_vgg_model(window_size):
+    vgg = tf.keras.applications.VGG16(include_top=False,
+                                    weights='imagenet',
+                                    input_shape=(window_size[0], window_size[1], 3))
+    vgg_max_pooling = layers.Lambda(lambda x: K.max(x, axis=(1,2)))(vgg.output)
+    vgg_flattened = layers.Flatten()(vgg_max_pooling)
+    model = tf.keras.Model([vgg.input], vgg_flattened)
+    return model
+
 class VGGFeatureExtractorMax:
-    def __init__(self, window_size=(200,200), mutation_strategy = None):
+    def __init__(self, window_size=(200,200), mutation_strategy = None, extract_patches=True, vgg_model=None):
         self.window_size = window_size
         self.mutation_strategy = mutation_strategy
-        vgg = tf.keras.applications.VGG16(include_top=False,
-                                        weights='imagenet',
-                                        input_shape=(window_size[0], window_size[1], 3))
-        vgg_max_pooling = layers.Lambda(lambda x: K.max(x, axis=(1,2)))(vgg.output)
-        vgg_flattened = layers.Flatten()(vgg_max_pooling)
-        model = tf.keras.Model([vgg.input], vgg_flattened)
-        self.model = model
+        self.extract_patches = extract_patches
+        self.model = vgg_model
+        if self.model is None:
+            self.model = get_std_vgg_model(window_size)
 
     def get_output_shapes(self):
         shapes = []
@@ -41,9 +47,16 @@ class VGGFeatureExtractorMax:
         patches = []
         for path in items:
             im = get_image(path)
-            _p = get_patches_from_image(im, window_size=self.window_size, window_overlap=0.5)
-            patches.append(_p)
-        patches = np.concatenate(patches)
+            if self.extract_patches:
+                _p = get_patches_from_image(im, window_size=self.window_size, window_overlap=0.5)
+                patches.append(_p)
+            else:
+                im = cv2.resize(im, self.window_size)
+                patches.append(im)
+        if self.extract_patches:
+            patches = np.concatenate(patches)
+        else:
+            patches = np.array(patches)
 
         if self.mutation_strategy is not None:
             for item in patches:
