@@ -4,6 +4,7 @@ from tensorflow.keras import layers
 import numpy as np
 import gc
 from .HelperFunctions import get_image, get_patches_from_image
+import cv2
 
 def get_std_vgg_model(window_size):
     vgg = tf.keras.applications.VGG16(include_top=False,
