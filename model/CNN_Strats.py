@@ -89,7 +89,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
         vgg_out = rmac_model(vgg_out, exp, depth)
         atten = rmac_model(atten, exp, depth)
         comb = []
-        for d in depth:
+        for d in range(depth):
             c = combine_model([vgg_out[d], atten[d]])
             c = reduce_model(c)
             comb.append(c)
@@ -100,7 +100,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
     if vgg_output and rmac:
         vgg_out = rmac_model(vgg_out, exp, depth)
         comb = []
-        for d in depth:
+        for d in range(depth):
             c = reduce_model(vgg_out[d])
             comb.append(c)
         vgg_out = combine_model(comb)
@@ -110,7 +110,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
     if attention and rmac:
         atten = rmac_model(atten, exp, depth)
         comb = []
-        for d in depth:
+        for d in range(depth):
             c = reduce_model(atten[d])
             comb.append(c)
         atten = combine_model(comb)
@@ -121,7 +121,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
         vgg_out = rmac_model(vgg_out, exp, depth)
         atten = rmac_model(atten, exp, depth)
         comb = []
-        for d in depth:
+        for d in range(depth):
             c = combine_model([vgg_out[d], atten[d]])
             c = normalize_model(c)
             comb.append(c)
