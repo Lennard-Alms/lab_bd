@@ -38,22 +38,17 @@ def mac_model(tensor_in, exp):
 
 def rmac_model(tensor_in, exp, depth):
     exp_out = layers.Lambda(lambda x: x ** exp)(tensor_in)
-    print('exit1')
     short_side = min(exp_out.shape[1], exp_out.shape[2])
 
     maps = []
 
     for d in range(1,depth+1):
-        print('exit2')
         size = math.floor(short_side/d)
         stride = math.floor(size * 0.2)
 
         pool = layers.AveragePooling2D((size,size),(stride,stride), padding='VALID')(exp_out)
-        print('exit3')
         pool = layers.Lambda(lambda x: x ** (1/exp))(pool)
-        print('exit4')
         pool = normalize_model(pool)
-        print('exit5')
         maps.append(pool)
 
     return maps
@@ -66,7 +61,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
                                           weights='imagenet',
                                           input_shape=in_shape)
 
-    vgg_out = vgg.get_layer('block5_conv4').output
+    vgg_out = vgg.get_layer('block5_conv3').output
 
     if attention:
         atten = self_attention_model(vgg_out)
