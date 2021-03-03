@@ -44,7 +44,7 @@ def jaccard_similarity(H, Q, sort=True):
         indices = np.arange(H.shape[0])
     return similarities, indices
 
-def cosine_distance(H, Q, normalized=True, via_hash=False):
+def cosine_distance(H, Q, normalized=False, via_hash=False):
     if via_hash:
         return hamming_distance(H, Q) * np.pi / H.shape[1]
     if normalized:
