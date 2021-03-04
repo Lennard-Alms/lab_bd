@@ -45,7 +45,7 @@ def rmac_model(tensor_in, exp, depth):
 
     for d in range(1,depth+1):
         size = math.floor(short_side/d)
-        stride = math.floor(size * 0.2)
+        stride = math.floor(size * 0.5)
 
         pool = layers.AveragePooling2D((size,size),(stride,stride), padding='VALID')(exp_out)
         pool = layers.Lambda(lambda x: x ** (1/exp))(pool)
