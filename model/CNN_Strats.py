@@ -38,6 +38,7 @@ def mac_model(tensor_in, exp):
 
 def rmac_model(tensor_in, exp, depth):
     exp_out = layers.Lambda(lambda x: x ** exp)(tensor_in)
+
     short_side = min(exp_out.shape[1], exp_out.shape[2])
 
     maps = []
@@ -128,11 +129,11 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
         return keras.models.Model(vgg.input, comb)
 
     if vgg_output and regions:
-        vgg_out = rmac_model(vgg_out, depth)
+        vgg_out = rmac_model(vgg_out, exp, depth)
         return keras.models.Model(vgg.input, vgg_out)
 
     if attention and regions:
-        atten = rmac_model(atten, depth)
+        atten = rmac_model(atten, exp, depth)
         return keras.models.Model(vgg.input, atten)
 
 
