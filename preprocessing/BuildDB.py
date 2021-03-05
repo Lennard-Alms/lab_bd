@@ -161,7 +161,7 @@ def extract_features(input_images, model, batch_size=20, network_batch_size=5, c
 
       images = np.array([get_image(im, pil, shape, fill_option) for im in input_images[path_idx_start:path_idx_end]])
 
-      features = model.predict(tf.keras.applications.vgg19.preprocess_input(images), verbose=1, batch_size=network_batch_size)
+      features = model.predict(tf.keras.applications.vgg16.preprocess_input(images), verbose=1, batch_size=network_batch_size)
       features_collection.append(features)
 
       del(features)

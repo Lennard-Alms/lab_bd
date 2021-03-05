@@ -36,39 +36,33 @@ def mac_model(tensor_in, exp):
     gem = GeM(exp)(tensor_in)
     return gem
 
-def rmac_model(tensor_in, exp):
+def rmac_model(tensor_in, exp, depth):
     exp_out = layers.Lambda(lambda x: x ** exp)(tensor_in)
 
-    long_side = max(exp_out.shape[1], exp_out.shape[2])
+    short_side = min(exp_out.shape[1], exp_out.shape[2])
 
-    halfs = math.floor(long_side/2)
-    quater = math.floor(long_side/4)
-    eights = math.floor(long_side/8)
-    sixtheens = math.floor(long_side/16)
+    maps = []
 
-    pool_halfs = layers.AveragePooling2D((halfs,halfs),(quater,quater), padding='VALID')(exp_out)
-    pool_quater = layers.AveragePooling2D((quater,quater),(eights,eights), padding='VALID')(exp_out)
-    pool_eights = layers.AveragePooling2D((eights,eights),(sixtheens,sixtheens), padding='VALID')(exp_out)
+    for d in range(1,depth+1):
+        size = math.floor(short_side/d)
+        stride = math.floor(size * 0.5)
 
-    pool_halfs = layers.Lambda(lambda x: x ** (1/exp))(pool_halfs)
-    pool_quater = layers.Lambda(lambda x: x ** (1/exp))(pool_quater)
-    pool_eights = layers.Lambda(lambda x: x ** (1/exp))(pool_eights)
+        pool = layers.AveragePooling2D((size,size),(stride,stride), padding='VALID')(exp_out)
+        pool = layers.Lambda(lambda x: x ** (1/exp))(pool)
+        pool = normalize_model(pool)
+        maps.append(pool)
 
-    pool_halfs = normalize_model(pool_halfs)
-    pool_quater = normalize_model(pool_quater)
-    pool_eights = normalize_model(pool_eights)
-
-    return [pool_halfs, pool_quater, pool_eights]
+    return maps
 
 
 
 
-def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rmac=False, regions=False):
-    vgg = tf.keras.applications.VGG19(include_top=False,
+def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rmac=False, regions=False, depth=10):
+    vgg = tf.keras.applications.VGG16(include_top=False,
                                           weights='imagenet',
                                           input_shape=in_shape)
 
-    vgg_out = vgg.get_layer('block5_conv4').output
+    vgg_out = vgg.get_layer('block5_conv3').output
 
     if attention:
         atten = self_attention_model(vgg_out)
@@ -93,53 +87,53 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
         return keras.models.Model(vgg.input, atten)
 
     if vgg_output and attention and rmac:
-        vgg_out = rmac_model(vgg_out, exp)
-        atten = rmac_model(atten, exp)
-        c0 = combine_model([vgg_out[0], atten[0]])
-        c1 = combine_model([vgg_out[1], atten[1]])
-        c2 = combine_model([vgg_out[2], atten[2]])
-        c0 = reduce_model(c0)
-        c1 = reduce_model(c1)
-        c2 = reduce_model(c2)
-        combined = combine_model([c0,c1,c2])
+        vgg_out = rmac_model(vgg_out, exp, depth)
+        atten = rmac_model(atten, exp, depth)
+        comb = []
+        for d in range(depth):
+            c = combine_model([vgg_out[d], atten[d]])
+            c = reduce_model(c)
+            comb.append(c)
+        combined = combine_model(comb)
         combined =  normalize_model(combined)
         return keras.models.Model(vgg.input, combined)
 
     if vgg_output and rmac:
-        vgg_out = rmac_model(vgg_out, exp)
-        c0 = reduce_model(vgg_out[0])
-        c1 = reduce_model(vgg_out[1])
-        c2 = reduce_model(vgg_out[2])
-        vgg_out = combine_model([c0,c1,c2])
+        vgg_out = rmac_model(vgg_out, exp, depth)
+        comb = []
+        for d in range(depth):
+            c = reduce_model(vgg_out[d])
+            comb.append(c)
+        vgg_out = combine_model(comb)
         vgg_out = normalize_model(vgg_out)
         return keras.models.Model(vgg.input, vgg_out)
 
     if attention and rmac:
-        atten = rmac_model(atten, exp)
-        c0 = reduce_model(atten[0])
-        c1 = reduce_model(atten[1])
-        c2 = reduce_model(atten[2])
-        atten = combine_model([c0,c1,c2])
+        atten = rmac_model(atten, exp, depth)
+        comb = []
+        for d in range(depth):
+            c = reduce_model(atten[d])
+            comb.append(c)
+        atten = combine_model(comb)
         atten = normalize_model(atten)
         return keras.models.Model(vgg.input, atten)
 
     if vgg_output and attention and regions:
-        vgg_out = rmac_model(vgg_out, exp)
-        atten = rmac_model(atten, exp)
-        c0 = combine_model([vgg_out[0], atten[0]])
-        c1 = combine_model([vgg_out[1], atten[1]])
-        c2 = combine_model([vgg_out[2], atten[2]])
-        c0 = normalize_model(c0)
-        c1 = normalize_model(c1)
-        c2 = normalize_model(c2)
-        return keras.models.Model(vgg.input, [c0,c1,c2])
+        vgg_out = rmac_model(vgg_out, exp, depth)
+        atten = rmac_model(atten, exp, depth)
+        comb = []
+        for d in range(depth):
+            c = combine_model([vgg_out[d], atten[d]])
+            c = normalize_model(c)
+            comb.append(c)
+        return keras.models.Model(vgg.input, comb)
 
     if vgg_output and regions:
-        vgg_out = rmac_model(vgg_out)
+        vgg_out = rmac_model(vgg_out, exp, depth)
         return keras.models.Model(vgg.input, vgg_out)
 
     if attention and regions:
-        atten = rmac_model(atten)
+        atten = rmac_model(atten, exp, depth)
         return keras.models.Model(vgg.input, atten)
 
 
