@@ -60,7 +60,6 @@ class VGGFeatureExtractorMax:
             im = get_image(path)
             if self.extract_patches:
                 _p = get_patches_from_image(im, window_size=self.window_size, window_overlap=0.5)
-                print(_p.shape)
                 patches.append(_p)
             else:
                 im = cv2.resize(im, self.window_size)
