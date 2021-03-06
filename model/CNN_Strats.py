@@ -46,7 +46,8 @@ def rmac_model(tensor_in, exp, depth):
     for d in range(1,depth+1):
         size = math.floor(short_side/d)
         stride = math.floor(size * 0.5)
-
+        print(size)
+        print(stride)
         pool = layers.AveragePooling2D((size,size),(stride,stride), padding='VALID')(exp_out)
         pool = layers.Lambda(lambda x: x ** (1/exp))(pool)
         pool = normalize_model(pool)
@@ -63,7 +64,7 @@ def build_model(in_shape, exp, vgg_output=False, attention=False, mac=False, rma
                                           input_shape=in_shape)
 
     vgg_out = vgg.get_layer('block5_conv3').output
-
+    print(vgg_out.shape)
     if attention:
         atten = self_attention_model(vgg_out)
 
