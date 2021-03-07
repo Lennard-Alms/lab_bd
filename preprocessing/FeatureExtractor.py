@@ -41,7 +41,7 @@ class VGGFeatureExtractorMax:
         if self.mutation_strategy is not None:
             shapes.append((1,))
         if self.return_patches:
-            shapes.append(window_size)
+            shapes.append(self.window_size)
         return shapes
 
     def get_no_of_outputs(self):
