@@ -57,7 +57,7 @@ class VGGFeatureExtractorMax:
         if self.mutation_strategy is not None:
             postfixes.append("label")
         if self.return_patches:
-            psotfixes.append("patches")
+            postfixes.append("patches")
         return postfixes
 
     def execute(self, items):
