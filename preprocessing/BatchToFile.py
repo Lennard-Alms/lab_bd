@@ -24,9 +24,8 @@ class BatchProcessToFile:
             dset_name = dataset_name
             if postfixes[i] != "":
                 dset_name = dset_name + "_" + postfixes[i]
-            # dset_name = dataset_name + "_" + postfixes[i]
-            if dataset_name in self.f:
-                dataset = self.f[dataset_name]
+            if dset_name in self.f:
+                dataset = self.f[dset_name]
             else:
                 dataset = self.f.create_dataset(dset_name, save_shape, dtype='f', maxshape=max_shape)
             datasets.append(dataset)

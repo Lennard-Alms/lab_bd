@@ -3,6 +3,8 @@ import numpy as np
 import cv2
 import tensorflow as tf
 import gc
+from PIL import Image, ImageFile
+
 
 def get_patches_from_image(image, window_size, window_overlap):
     number_of_tiles_x = int(math.ceil(image.shape[1] / (window_size[1] * (1 - window_overlap))))
@@ -27,7 +29,7 @@ def get_patches_from_image(image, window_size, window_overlap):
             x_start = int(np.maximum(x_center - window_size[1] // 2, 0))
             x_end = int(np.minimum(x_center + window_size[1] // 2, image.shape[1]))
             patch = image[y_start:y_end, x_start:x_end]
-            patch = cv2.resize(patch, (200,200))
+            # patch = cv2.resize(patch, (200,200))
             patches.append(patch)
     return np.array(patches)
 
@@ -56,11 +58,40 @@ def get_patch_locations(image, window_size, window_overlap):
             patches.append(np.array([y_start,y_end,x_start,x_end]))
     return np.array(patches)
 
-def get_image(path_or_image):
+def pil_loader(path):
+    ImageFile.LOAD_TRUNCATED_IMAGES = True
+    with open(path, 'rb') as f:
+        img = Image.open(f)
+        return img.convert('RGB')
+
+def get_image(path_or_image, pil=False, shape=None, fill_option=None):
     if isinstance(path_or_image, str):
-        return cv2.imread(path_or_image)
+        if pil:
+            im = np.array(pil_loader(path_or_image))
+        else:
+            im = cv2.imread(path_or_image)
     else:
-        return path_or_image
+        im = path_or_image
+    if shape is None:
+        return im
+    else:
+        if fill_option is None:
+            raise ValueError('shaping requires a fill_option, choose one of: resize, noise, black, white')
+        else:
+            if fill_option == 'resize':
+                return cv2.resize(im, (shape[1],shape[0]))
+
+            elif fill_option == 'noise':
+                im_o = np.random.randint(0,255, shape).astype('uint8')
+            elif fill_option == 'white':
+                im_o = np.full(shape, 255).astype('uint8')
+            elif fill_option == 'black':
+                im_o = np.zeros(shape).astype('uint8')
+
+            offset_oh, offset_ow = (im_o.shape[0] - im.shape[0]) // 2, (im_o.shape[1] - im.shape[1]) // 2
+            offset_uh, offset_uw = offset_oh + im.shape[0], offset_ow + im.shape[1]
+            im_o[offset_oh:offset_uh,offset_ow:offset_uw] = im
+            return im_o
 
 def predict_w_vgg(patches, patch_size):
     vgg = tf.keras.applications.VGG16(include_top=False,

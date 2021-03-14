@@ -32,7 +32,6 @@ def calculateError(_sims, _index, positive_indices, steps=100):
     # print("recall,", "precision,", "accuracy,", recall, precision, accuracy)
     # print("TP, FP, FN, TN", TP, FP, FN, TN)
 
-
 def jaccard_similarity(H, Q, sort=True):
     M = H * Q[np.newaxis,:]
     intersection = M.sum(axis=1)
@@ -45,13 +44,17 @@ def jaccard_similarity(H, Q, sort=True):
         indices = np.arange(H.shape[0])
     return similarities, indices
 
-def cosine_distance(H, Q):
-    H_length = np.linalg.norm(H, axis=1)
-    Q_length = np.linalg.norm(Q, axis=0)
-    distances = np.dot(H, Q) / (H_length * Q_length)
-    distances[np.where(distances > 1)] = 1
-    distances[np.where(distances < -1)] = -1
-    return np.arccos(distances)
+def cosine_distance(H, Q, normalized=False, via_hash=False):
+    if via_hash:
+        return hamming_distance(H, Q) * np.pi / H.shape[1]
+    if normalized:
+        return np.arccos(np.dot(H,Q).flatten())
+    else:
+        return np.arccos(np.dot(H,Q).flatten() / (np.linalg.norm(H, axis=1) * np.linalg.norm(Q)))
+
+def sort_by_distance(distances):
+    indices = np.argsort(distances)
+    return distances[indices], indices
 
 def hamming_distance(H, Q):
     xor = np.logical_xor(H, Q[np.newaxis,:])
@@ -98,14 +101,19 @@ def evaluate_result(result_ids, class_labels, query_label):
   SCTN = number_of_images - SCTP - SCFP - SCFN
   ICTN = number_of_images - ICTP - ICFP - ICFN
 
-  sc_precision = SCTP / (SCTP + SCFP)
-  ic_precision = ICTP / (ICTP + ICFP)
+  ic_recall = ICTP / (ICTP + ICFN)
+  ic_accuracy = (ICTP + ICTN) / (number_of_images)
+  if ICTP + ICFP != 0:
+      ic_precision = ICTP / (ICTP + ICFP)
+  else:
+      ic_precision = 1
 
   sc_recall = SCTP / (SCTP + SCFN)
-
-  ic_recall = ICTP / (ICTP + ICFN)
-
   sc_accuracy = (SCTP + SCTN) / (number_of_images)
-  ic_accuracy = (ICTP + ICTN) / (number_of_images)
+  if SCTP + SCFP != 0:
+      sc_precision = SCTP / (SCTP + SCFP)
+  else:
+      sc_precision = 1
+
 
   return ((sc_precision, sc_recall, sc_accuracy), (ic_precision, ic_recall, ic_accuracy))
