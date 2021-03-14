@@ -101,7 +101,7 @@ def evaluate_result(result_ids, class_labels, query_label):
   SCTN = number_of_images - SCTP - SCFP - SCFN
   ICTN = number_of_images - ICTP - ICFP - ICFN
 
-  if ICTP != 0
+  if ICTP != 0:
       sc_precision = SCTP / (SCTP + SCFP)
       ic_precision = ICTP / (ICTP + ICFP)
       sc_recall = SCTP / (SCTP + SCFN)
