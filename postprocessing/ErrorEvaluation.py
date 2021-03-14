@@ -108,5 +108,12 @@ def evaluate_result(result_ids, class_labels, query_label):
       ic_recall = ICTP / (ICTP + ICFN)
       sc_accuracy = (SCTP + SCTN) / (number_of_images)
       ic_accuracy = (ICTP + ICTN) / (number_of_images)
+  else:
+      sc_precision = 0
+      ic_precision = 0
+      sc_recall = 0
+      ic_recall = 0
+      sc_accuracy = 0
+      ic_accuracy = 0
 
   return ((sc_precision, sc_recall, sc_accuracy), (ic_precision, ic_recall, ic_accuracy))
